@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from datetime import timedelta
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,24 +23,42 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-e^5b&7&fixh#st-0wpz&x(4$i&8^2#e4x)h0@#kb0hc=5s@&p2'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = ['www.smartfines.net', 'smartfines.net', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = config('DJANGO_ALLOWED_HOSTS').split(',')
+PORT = 8080  
 
 
 # Application definition
-
 INSTALLED_APPS = [
+    'jazzmin',
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
+    'django.contrib.humanize',
+
+    'accounts',
+    'core',
+
+  
+    'django_countries',
+    'channels',
+    'storages',
+    'corsheaders',
+    'csp',
+    'import_export',
+    'rest_framework',
+    'whitenoise.runserver_nostatic',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -47,14 +68,62 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Third-party middleware
+    'django.middleware.locale.LocaleMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # CORS handling
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # Custom middleware
+    'smartfines_prj.middleware.RedirectToWWW',      
 ]
+
+# Channel / wbsockets settings 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default backend
+]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+}
+
+ASGI_APPLICATION = 'smartfines_prj.asgi.application'
+
+if DEBUG:
+    # Development Redis Localhost
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': config('CHANNEL_LAYERS_BACKEND'),
+            'CONFIG': {
+                'hosts': [(config('CHANNEL_LAYERS_HOST'), int(config('CHANNEL_LAYERS_PORT')))],
+            },
+        },
+    }
+else:
+    # Production Google Redis
+    CACHES = {
+        'default': {
+            'BACKEND': config('CACHE_BACKEND'),
+            'LOCATION': config('CACHE_LOCATION'),
+            'OPTIONS': {
+                'CLIENT_CLASS': config('CACHE_CLIENT_CLASS'),
+            },
+        }
+    }
+
+# Session engine (optional)
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
 
 ROOT_URLCONF = 'smartfines_prj.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -72,13 +141,38 @@ WSGI_APPLICATION = 'smartfines_prj.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+
+"""if DEBUG:
+    # Local PSQL DB
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': config('DB_NAME_LOCAL'),
+            'USER': config('DB_USER_LOCAL'),
+            'PASSWORD': config('DB_PASSWORD_LOCAL'),
+            'HOST': config('DB_HOST_LOCAL'),
+            'PORT': config('DB_PORT_LOCAL', cast=int),
+        }
+    }
+else:
+    # Production PSQL DB
+    DATABASES = {
+        'default': {
+            'ENGINE': config('DB_ENGINE'),
+            'NAME': config('DB_NAME_RAILWAY'),
+            'USER': config('DB_USER_RAILWAY'),
+            'PASSWORD': config('DB_PASSWORD_RAILWAY'),
+            'HOST': config('DB_HOST_RAILWAY'),
+            'PORT': config('DB_PORT_RAILWAY', cast=int),
+        }
+    }"""
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -111,10 +205,206 @@ USE_I18N = True
 USE_TZ = True
 
 
+# Languages you support
+LANGUAGES = [
+    ('en', 'English'),
+    ('es', 'Español'),  # Spanish
+    ('fr', 'Français'),  # French
+    ('de', 'Deutsch'),  # German
+    ('zh-hans', '简体中文'),  # Simplified Chinese
+    ('zh-hant', '繁體中文'),  # Traditional Chinese
+    ('ar', 'العربية'),  # Arabic
+    ('hi', 'हिन्दी'),  # Hindi
+    ('pt', 'Português'),  # Portuguese
+    ('ru', 'Русский'),  # Russian
+    ('ja', '日本語'),  # Japanese
+    ('ko', '한국어'),  # Korean
+    ('it', 'Italiano'),  # Italian
+    ('tr', 'Türkçe'),  # Turkish
+    ('vi', 'Tiếng Việt'),  # Vietnamese
+    ('sw', 'Kiswahili'),  # Swahili
+    ('pl', 'Polski'),  # Polish
+    ('bn', 'বাংলা'),  # Bengali
+    ('ur', 'اردو'),  # Urdu
+    ('mr', 'मराठी'),  # Marathi
+    ('ta', 'தமிழ்'),  # Tamil
+]
+
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+
+STATIC_URL = '/static/'
+
+# Use WhiteNoise compressed storage
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', cast=bool)  # Ensure this is disabled
+CORS_ALLOWED_ORIGINS = config('DJANGO_CORS_ALLOWED_ORIGINS', default='').split(',')
+CORS_ALLOW_CREDENTIALS = config('CORS_ALLOW_CREDENTIALS', cast=bool)  # Allow cookies to be sent with requests if needed
+CORS_ALLOW_HEADERS = ["authorization", "content-type", "x-csrftoken",]  # Restrict to headers you actually need
+CORS_PREFLIGHT_MAX_AGE = config('CORS_PREFLIGHT_MAX_AGE', cast=int)  # Cache preflight response for better performance
+
+# Cookies Configurations
+CSRF_TRUSTED_ORIGINS = config('DJANGO_CSRF_TRUSTED_ORIGINS', default='').split(',')
+CSRF_USE_SESSIONS = config('CSRF_USE_SESSIONS', cast=bool)
+SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', cast=bool)
+CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', cast=bool)
+SESSION_COOKIE_HTTPONLY = config('SESSION_COOKIE_HTTPONLY', cast=bool)
+CSRF_COOKIE_HTTPONLY = config('CSRF_COOKIE_HTTPONLY', cast=bool)
+SESSION_COOKIE_AGE = config('SESSION_COOKIE_AGE', cast=int)  # Two weeks
+SECURE_CONTENT_TYPE_NOSNIFF = config('SECURE_CONTENT_TYPE_NOSNIFF', cast=bool)
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Keep session even after closing browser
+SESSION_SAVE_EVERY_REQUEST = True  # Update session expiry on every request
+SESSION_COOKIE_NAME = "sessionid"
+
+if DEBUG:
+    SESSION_COOKIE_DOMAIN = None #".tespos.dev" # No domain for cookies in local dev
+    CSRF_COOKIE_DOMAIN = None #".tespos.dev"  # No domain for CSRF token in local dev
+else:
+    SESSION_COOKIE_DOMAIN = ".tespos.com"  # Enables session sharing across subdomains in production
+    CSRF_COOKIE_DOMAIN = ".tespos.com"  # CSRF cookie must also be shared across subdomains in production
+
+# Cookie SameSite settings
+CSRF_COOKIE_SAMESITE = "Lax"  # Ensure CSRF cookies are sent with cross-site requests
+SESSION_COOKIE_SAMESITE = "Lax"  # Prevent cross-site tracking
+
+
+
+FILE_UPLOAD_MAX_MEMORY_SIZE = 1073741824 # 1 GB
+
+CONTENT_SECURITY_POLICY = {
+    'DIRECTIVES': {
+        'connect-src': ("'self'",),
+        'default-src': ("'self'",),
+        'font-src': ("'self'",),
+        'frame-src': ("'none'",),
+        'img-src': ("'self'", 'data:'),
+        'manifest-src': ("'self'",),
+        'media-src': ("'self'",),
+        'object-src': ("'none'",),
+        'report-uri': '/csp-violation-report-endpoint/',
+        'sandbox': ('allow-forms', 'allow-scripts', 'allow-same-origin'),
+        'script-src': ("'self'", "'unsafe-inline'", "'unsafe-eval'"),
+        'style-src': ("'self'", "'unsafe-inline'")
+    }
+}
+
+# Rate Limiting Configuration
+RATELIMIT_ENABLE = True
+RATELIMIT_KEY = 'ip'
+RATELIMIT_RATE = '5/m'
+
+AUTH_USER_MODEL = 'accounts.User'
+
+LOGIN_URL = '/login/'
+
+# Zepto Mail SMTP Configuration
+EMAIL_BACKEND = config('EMAIL_BACKEND')
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')  
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')  
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
+
+
+JAZZMIN_SETTINGS = {
+    # title of the window (Will default to current_admin_site.site_title if absent or None)
+    "site_title": "TESPOS ADMIN PANEL",
+
+    # Title on the login screen (19 chars max) (defaults to current_admin_site.site_header if absent or None)
+    "site_header": "TESPOS ADMIN",
+
+    # Title on the brand (19 chars max) (defaults to current_admin_site.site_header if absent or None)
+    "site_brand": "TESPOS ADMIN",
+
+    # Logo to use for your site, must be present in static files, used for brand on top left
+    #"site_logo": "icons/favicon.png",
+
+    # Logo to use for your site, must be present in static files, used for login form logo (defaults to site_logo)
+    #"login_logo": 'icons/logo_resized.png',
+
+    # Logo to use for login form in dark themes (defaults to login_logo)
+    "login_logo_dark": None,
+
+    # CSS classes that are applied to the logo above
+    "site_logo_classes": "img-circle",
+
+    # Relative path to a favicon for your site, will default to site_logo if absent (ideally 32x32 px)
+    "site_icon": None,
+
+    # Welcome text on the login screen
+    "welcome_sign": "WELCOME TO ADMIN PANNEL",
+
+    # Copyright on the footer
+    "copyright": "TESPOS COMPANY LIMITED",
+
+    # The model admin to search from the search bar, search bar omitted if excluded
+    "search_model": "accounts.User",
+
+    # Field name on user model that contains avatar ImageField/URLField/Charfield or a callable that receives the user
+    "user_avatar": None,
+
+    # Whether to display the side menu
+    "show_sidebar": True,
+
+    # Whether to aut expand the menu
+    "navigation_expanded": True,
+
+    # List of apps (and/or models) to base side menu ordering off of (does not need to contain all apps/models)
+    "order_with_respect_to": ["accounts"],
+
+    # Enabling language selector in admin site
+    "language_chooser": True,
+
+    "icons": {
+        "accounts": "fas fa-users-cog",
+        "accounts.User": "fas fa-user",
+        "accounts.Group": "fas fa-users",
+    },
+    
+
+    # Icons that are used when one is not manually specified
+    "default_icon_parents": "fas fa-chevron-circle-right",
+    "default_icon_children": "fas fa-circle",
+
+    "related_modal_active": False,
+    "show_ui_builder": False,
+    "changeform_format": "horizontal_tabs",
+    "changeform_format_overrides": {"accounts.User": "collapsible", "accounts.group": "vertical_tabs"},
+}
+
+"""JAZZMIN_UI_TWEAKS = {
+    "navbar": "navbar-dark",
+    "theme": "darkly",
+    "dark_mode_theme": "darkly",
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}"""
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
