@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-e^5b&7&fixh#st-0wpz&x(4$i&8^2#e4x)h0@#kb0hc=5s@&p2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['smartfines.net', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['www.smartfines.net', 'smartfines.net', '127.0.0.1', 'localhost']
 
 
 # Application definition
