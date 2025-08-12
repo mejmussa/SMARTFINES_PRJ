@@ -278,8 +278,8 @@ if DEBUG:
     SESSION_COOKIE_DOMAIN = None #".tespos.dev" # No domain for cookies in local dev
     CSRF_COOKIE_DOMAIN = None #".tespos.dev"  # No domain for CSRF token in local dev
 else:
-    SESSION_COOKIE_DOMAIN = ".tespos.com"  # Enables session sharing across subdomains in production
-    CSRF_COOKIE_DOMAIN = ".tespos.com"  # CSRF cookie must also be shared across subdomains in production
+    SESSION_COOKIE_DOMAIN = ".smartfines.net"  # Enables session sharing across subdomains in production
+    CSRF_COOKIE_DOMAIN = ".smartfines.net"  # CSRF cookie must also be shared across subdomains in production
 
 # Cookie SameSite settings
 CSRF_COOKIE_SAMESITE = "Lax"  # Ensure CSRF cookies are sent with cross-site requests
@@ -326,13 +326,13 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
 
 JAZZMIN_SETTINGS = {
     # title of the window (Will default to current_admin_site.site_title if absent or None)
-    "site_title": "TESPOS ADMIN PANEL",
+    "site_title": "SmartFines ADMIN PANEL",
 
     # Title on the login screen (19 chars max) (defaults to current_admin_site.site_header if absent or None)
-    "site_header": "TESPOS ADMIN",
+    "site_header": "SmartFines ADMIN",
 
     # Title on the brand (19 chars max) (defaults to current_admin_site.site_header if absent or None)
-    "site_brand": "TESPOS ADMIN",
+    "site_brand": "SmartFines ADMIN",
 
     # Logo to use for your site, must be present in static files, used for brand on top left
     #"site_logo": "icons/favicon.png",
@@ -353,7 +353,7 @@ JAZZMIN_SETTINGS = {
     "welcome_sign": "WELCOME TO ADMIN PANNEL",
 
     # Copyright on the footer
-    "copyright": "TESPOS COMPANY LIMITED",
+    "copyright": "SmartFines",
 
     # The model admin to search from the search bar, search bar omitted if excluded
     "search_model": "accounts.User",
