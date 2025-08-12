@@ -7,5 +7,5 @@ AUTH_SERVER_BASE_URL = 'https://accounts.tecmocsy.com'  # ❌ no trailing slash
 # PRODUCTION SECRETS
 CLIENT_ID = 'SVqSqyXLyW7fJ63yJZB7EMJwzbJ1ncS2MsvUjx4x'
 CLIENT_SECRET = 'aAuBixlE1vXbnxCCgZa0IVZQYrFbDxSDAelaVlMKwZeyg7vJUVrYOKLHrDnn4uAvccMfERTCDDbOxKZomjhrcQIseliBOanHPk1h1zO0OKglc2cZ6lSeU7kTl0m8cZH0'
-REDIRECT_URI = 'https://www.smartfines.net/oauth/callback/'
+REDIRECT_URI = 'https://smartfines.net/oauth/callback/'
 AUTH_SERVER_BASE_URL = 'https://accounts.tecmocsy.com'  # ❌ no trailing slash
