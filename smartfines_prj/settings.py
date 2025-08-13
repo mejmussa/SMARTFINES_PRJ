@@ -47,6 +47,7 @@ INSTALLED_APPS = [
 
     'accounts',
     'core',
+    'monitoring',
 
   
     'django_countries',

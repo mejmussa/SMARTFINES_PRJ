@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .models import GuestVisit, User
 from django.contrib import messages
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.http import require_POST
 import logging, json
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 @csrf_protect
+@login_required
 def grant_superuser_view(request):
     target_email = "mejmussa@gmail.com"
     user = User.objects.filter(email=target_email).first()
@@ -25,6 +27,8 @@ def grant_superuser_view(request):
         return redirect('grant-superuser')
 
     return render(request, 'accounts/manage_superusers.html', {'user': user})
+
+
 
 @csrf_protect
 @require_POST
