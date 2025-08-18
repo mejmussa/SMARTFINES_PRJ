@@ -1,12 +1,12 @@
 beautifulsoup4
 boto3
-channels==4.2.2
+channels
 daphne
-Django==4.2
+Django==5.2
 django-cors-headers
 django-countries
 django-crispy-forms
-django-csp==3.7
+django-csp
 django-hosts
 django-humanize
 django-import-export

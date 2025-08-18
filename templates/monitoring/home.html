@@ -176,7 +176,7 @@
         <tbody>
             {% for offense in page_obj %}
             <tr>
-                <td>{{ offense.plate_number }}</td>
+                <td>{{ offense.vehicle.plate_number }}</td>
                 <td>{{ offense.reference }}</td>
                 <td>{{ offense.license }}</td>
                 <td>{{ offense.location }}</td>

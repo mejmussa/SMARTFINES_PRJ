@@ -1,26 +1,36 @@
-from playwright.sync_api import sync_playwright
 import time
-from datetime import datetime
 import re
 import os
 import django
+from datetime import datetime
 import concurrent.futures
-from django.utils import timezone
-from monitoring.models import TrafficOffense
 
-# Setup Django
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "trafficwatch_prj.settings")
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+# Django setup
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "smartfines_prj.settings")
 django.setup()
 
-# 1. SCANIA "T325EJR" , "T494EJR"  ZUBERI
-# 2. SCANIA  "T869EMS", "T870EMS"  MUSSA MUSSA
+from monitoring.models import TrafficOffense
+from accounts.models import User
+from .models import Vehicle
+from django.utils import timezone
 
-PLATES = ["T291BWM", "T460DYA", "T797ARA", "T813BAW", "T859DJC", "T615BBE", "T847BJW", "T349DHU", "T869EMS", "T870EMS", "T152DHH", "T877DJY", "T325EJR", "T494EJR"] # 1. SCANIA "T325EJR", "T494EJR"
-executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+# Thread executor for DB writes
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=2)
 
-
-def mark_offenses_as_paid_if_missing(plate, current_modal_text):
-    known_unpaid = TrafficOffense.objects.filter(plate_number=plate, is_paid=False)
+# --------------------
+# DB Functions
+# --------------------
+def mark_offenses_as_paid_if_missing(vehicle, current_modal_text):
+    known_unpaid = TrafficOffense.objects.filter(vehicle=vehicle, is_paid=False)
     references_on_page = set(re.findall(r'\b[A-Z0-9]{8,}\b', current_modal_text))
 
     for offense in known_unpaid:
@@ -28,19 +38,18 @@ def mark_offenses_as_paid_if_missing(plate, current_modal_text):
             offense.is_paid = True
             offense.status = "PAID"
             offense.save()
-            print(f"[✔] Marked as PAID: {offense.plate_number} - {offense.reference}")
+            print(f"[✔] Marked as PAID: {offense.vehicle.plate_number} - {offense.reference}")
 
 
-def save_offenses_to_db(text, plate):
-    print(f"\n[✓] Result for {plate}\n" + "=" * 60)
-
+def save_offenses_to_db(text, vehicle):
+    print(f"\n[✓] Result for {vehicle.plate_number}\n" + "=" * 60)
     print("\n🔍 RAW MODAL TEXT START\n" + "-" * 60)
     print(text)
     print("-" * 60 + "\n🔍 RAW MODAL TEXT END\n")
 
     if "No pending offences found." in text:
         print("🟢 No pending offences found.")
-        mark_offenses_as_paid_if_missing(plate, text)
+        mark_offenses_as_paid_if_missing(vehicle, text)
         return
 
     lines = [line.strip() for line in text.splitlines() if line.strip()]
@@ -73,133 +82,107 @@ def save_offenses_to_db(text, plate):
 
                 seen_references.add(reference)
 
-                try:
-                    obj = TrafficOffense.objects.get(plate_number=plate, reference=reference)
+                # Update or create offense
+                obj, created = TrafficOffense.objects.update_or_create(
+                    vehicle=vehicle,
+                    reference=reference,
+                    defaults={
+                        "license": license_no,
+                        "location": location,
+                        "offence": offence,
+                        "charge": float(charge),
+                        "penalty": float(penalty),
+                        "status": status,
+                        "issued_date": issued_date,
+                        "is_paid": (status == "PAID"),
+                    }
+                )
 
-                    updated = False
-                    if (
-                        obj.charge != float(charge) or
-                        obj.penalty != float(penalty) or
-                        obj.status != status or
-                        obj.issued_date != issued_date or
-                        obj.is_paid != (status == "PAID") or
-                        obj.location != location or
-                        obj.offence != offence
-                    ):
-                        obj.charge = float(charge)
-                        obj.penalty = float(penalty)
-                        obj.status = status
-                        obj.issued_date = issued_date
-                        obj.is_paid = (status == "PAID")
-                        obj.location = location
-                        obj.offence = offence
-                        obj.save()
-                        updated = True
-
-                    if updated:
-                        print(f"[↻] Updated offense: {reference}")
-                    else:
-                        print(f"[•] Offense exists, no changes: {reference}")
-
-                except TrafficOffense.DoesNotExist:
-                    TrafficOffense.objects.create(
-                        user_id=1,
-                        plate_number=plate,
-                        reference=reference,
-                        license=license_no,
-                        location=location,
-                        offence=offence,
-                        charge=float(charge),
-                        penalty=float(penalty),
-                        status=status,
-                        issued_date=issued_date,
-                        is_paid=(status == "PAID"),
-                    )
+                if created:
                     print(f"[✔] Saved new offense: {reference}")
+                else:
+                    print(f"[↻] Updated offense: {reference}")
 
             except Exception as e:
                 print(f"[x] Failed to process line: {e}")
                 import traceback
                 traceback.print_exc()
 
-    mark_offenses_as_paid_if_missing(plate, text)
+    mark_offenses_as_paid_if_missing(vehicle, text)
     print("=" * 60)
 
 
-def save_offenses_to_db_threadsafe(text, plate):
-    return executor.submit(save_offenses_to_db, text, plate).result()
+def save_offenses_to_db_threadsafe(text, vehicle):
+    return executor.submit(save_offenses_to_db, text, vehicle).result()
 
 
-def check_plate(page, plate):
-    page.goto("https://tms.tpf.go.tz/")
-    page.wait_for_selector("input[placeholder*='Search by Registration']")
+# --------------------
+# Selenium Scraper
+# --------------------
+def check_plate(driver, plate):
+    driver.get("https://tms.tpf.go.tz/")
+    
+    search_input = driver.find_element(By.CSS_SELECTOR, "input[placeholder*='Search by Registration']")
+    search_input.clear()
+    search_input.send_keys(plate)
 
-    print(f"\n[i] Typing plate: {plate}")
-    page.fill("input[placeholder*='Search by Registration']", "")
-    page.type("input[placeholder*='Search by Registration']", plate, delay=120)
+    # Try clicking search button, fallback to Enter
+    try:
+        search_btn = driver.find_element(By.CSS_SELECTOR, "input[placeholder*='Search by Registration'] + button")
+        search_btn.click()
+    except:
+        search_input.send_keys(Keys.ENTER)
 
     try:
-        page.click("input[placeholder*='Search by Registration'] + button")
-    except Exception as e:
-        print(f"[!] Click failed, trying Enter instead: {e}")
-        page.press("input[placeholder*='Search by Registration']", "Enter")
-
-    print("[i] Waiting for modal to appear and load content...")
-    try:
-        page.wait_for_selector(".modal", timeout=10000)
-        page.wait_for_function(
-            """() => {
-                const modal = document.querySelector('.modal');
-                return modal && (modal.innerText || '').trim().length > 10;
-            }""",
-            timeout=10000,
+        modal = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".modal"))
         )
-        print("[i] Modal is loaded.")
+        WebDriverWait(driver, 10).until(lambda d: len(modal.text.strip()) > 10)
+        return modal.text
+
     except Exception as e:
-        print(f"[x] ❌ Modal never appeared or had content for {plate}: {e}")
+        print(f"[x] ❌ Modal not found for {plate}: {e}")
         return None
 
-    try:
-        modal_text = page.locator(".modal").inner_text()
-        return str(modal_text)
-    except Exception as e:
-        print(f"[x] ❌ Failed to extract modal text: {e}")
-        return None
     finally:
         try:
-            page.click(".modal .close-btn")
+            close_btn = driver.find_element(By.CSS_SELECTOR, ".modal .close-btn")
+            close_btn.click()
         except:
             pass
 
 
 def run_checker():
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True) # False OR True FOR GUI USAGE 
-        page = browser.new_page()
+    chrome_options = Options()
+    #chrome_options.headless = True
+    chrome_options.add_argument("--headless=new")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--window-size=1920,1080") 
 
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+
+    try:
         while True:
-            for i, plate in enumerate(PLATES):
-                try:
-                    modal_text = check_plate(page, plate)
-                    if modal_text:
-                        save_offenses_to_db_threadsafe(modal_text, plate)
-                except Exception as e:
-                    print(f"[x] Error checking {plate}: {e}")
+            # Fetch all vehicles in DB
+            user_vehicles = Vehicle.objects.all()
 
-                if i == len(PLATES) - 1:
-                    try:
-                        page.fill("input[placeholder*='Search by Registration']", "")
-                    except:
-                        print("[!] Failed to clear input.")
+            for vehicle in user_vehicles:
+                try:
+                    modal_text = check_plate(driver, vehicle.plate_number)
+                    if modal_text:
+                        save_offenses_to_db_threadsafe(modal_text, vehicle)
+                except Exception as e:
+                    print(f"[x] Error checking {vehicle.plate_number}: {e}")
 
             print("\n[i] ✅ Round complete. Waiting 3600 seconds...\n")
-            time.sleep(3600)  # 🔄 Adjust if needed (3600 for 1 hour)
+            time.sleep(3600)
 
-        browser.close()
+    finally:
+        driver.quit()
 
 
 if __name__ == "__main__":
     run_checker()
-
-
-
