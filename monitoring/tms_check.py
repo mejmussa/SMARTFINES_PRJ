@@ -77,7 +77,6 @@ def save_offenses_to_db(text, vehicle):
                     vehicle=vehicle,
                     reference=reference,
                     defaults={
-                        "user": vehicle.user,
                         "license": license_no,
                         "location": location,
                         "offence": offence,
@@ -88,6 +87,7 @@ def save_offenses_to_db(text, vehicle):
                         "is_paid": (status == "PAID"),
                     }
                 )
+
 
                 if created:
                     print(f"[✔] Saved new offense: {reference}")
@@ -105,7 +105,7 @@ def save_offenses_to_db(text, vehicle):
 async def check_plate(plate):
     try:
         response = requests.post(
-            "https://playwrite.smartfines.net/api/automate",
+            "https://playwritepyprj-production.up.railway.app/api/automate",
             json={"url": "https://tms.tpf.go.tz/", "plate": plate},
             timeout=30
         )
@@ -127,14 +127,20 @@ async def check_plate(plate):
 
 async def run_checker():
     from monitoring.models import Vehicle
-    user_vehicles = await sync_to_async(lambda: list(Vehicle.objects.all()))()
 
-    for vehicle in user_vehicles:
-        try:
-            modal_text = await check_plate(vehicle.plate_number)
-            if modal_text:
-                await save_offenses_to_db(modal_text, vehicle)
-        except Exception as e:
-            print(f"[x] Error checking {vehicle.plate_number}: {e}")
+    while True:
+        user_vehicles = await sync_to_async(lambda: list(Vehicle.objects.all()))()
 
-    print("\n[i] ✅ Check complete.\n")
+        for vehicle in user_vehicles:
+            try:
+                modal_text = await check_plate(vehicle.plate_number)
+                if modal_text:
+                    await save_offenses_to_db(modal_text, vehicle)
+            except Exception as e:
+                print(f"[x] Error checking {vehicle.plate_number}: {e}")
+
+        print("\n[i] ✅ Round complete. Waiting 3600 seconds...\n")
+        await asyncio.sleep(3600)
+
+if __name__ == "__main__":
+    asyncio.run(run_checker())

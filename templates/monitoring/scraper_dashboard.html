@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scraper Dashboard</title>
+</head>
+<body>
+    <h1>Scraper Dashboard</h1>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Run Checker</button>
+    </form>
+    {% for item in screenshots %}
+        <h2>Plate: {{ item.plate }}</h2>
+        <p>Text: {{ item.text }}</p>
+        {% if item.screenshot %}
+            <img src="{{ item.screenshot }}" alt="Screenshot for {{ item.plate }}" style="max-width: 500px;">
+        {% else %}
+            <p>No screenshot available</p>
+        {% endif %}
+        <hr>
+    {% endfor %}
+</body>
+</html>

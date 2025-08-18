@@ -29,7 +29,6 @@ from core.views import PWAServeView
 import asyncio
 import threading
 
-
 sitemaps = {
     'static': StaticViewSitemap,
 }
