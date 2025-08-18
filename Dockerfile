@@ -1,8 +1,8 @@
-FROM python:3.11-slim
+FROM mcr.microsoft.com/playwright/python:v1.47.0-focal
 
 WORKDIR /app
 
-# Install system dependencies for Chrome
+# Install extra system dependencies if needed
 RUN apt-get update && apt-get install -y \
     wget \
     unzip \
@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
     libatk1.0-0 \
     libcups2 \
     libdbus-1-3 \
-    libgdk-pixbuf2.0-0 \
+    libgdk-pixbuf-xlib-2.0-0 \
     libnspr4 \
     libnss3 \
     libx11-xcb1 \
@@ -27,13 +27,7 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Chrome stable
-RUN wget -O /tmp/google-chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-    && apt-get update \
-    && apt-get install -y /tmp/google-chrome.deb \
-    && rm /tmp/google-chrome.deb
-
-# Copy requirements first
+# Copy and install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
