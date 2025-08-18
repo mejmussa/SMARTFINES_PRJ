@@ -162,7 +162,7 @@ def run_checker():
     chrome_options.add_argument("--window-size=1920,1080")
 
     # System ChromeDriver path
-    driver = webdriver.Chrome(service=Service("/usr/bin/chromedriver"), options=chrome_options)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
     try:
         while True:
