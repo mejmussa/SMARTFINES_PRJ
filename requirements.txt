@@ -6,7 +6,7 @@ Django==4.2
 django-cors-headers
 django-countries
 django-crispy-forms
-django-csp
+django-csp==3.7
 django-hosts
 django-humanize
 django-import-export
