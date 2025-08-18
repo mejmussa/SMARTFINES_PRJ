@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Install system dependencies for Playwright
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     wget gnupg ca-certificates \
     libglib2.0-0 libnspr4 libnss3 libdbus-1-3 \
@@ -9,14 +9,13 @@ RUN apt-get update && apt-get install -y \
     libx11-6 libxcomposite1 libxdamage1 \
     libxext6 libxfixes3 libxrandr2 libgbm1 \
     libcairo2 libpango-1.0-0 libasound2 \
+    gcc python3-dev libpq-dev \
  && rm -rf /var/lib/apt/lists/*
 
-# Install Python deps
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Playwright browsers
 RUN playwright install --with-deps
 
 COPY . .
