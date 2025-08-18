@@ -26,6 +26,33 @@ from core.sitemaps import StaticViewSitemap
 from django.views.generic import TemplateView
 from django.views.i18n import set_language
 from core.views import PWAServeView
+import asyncio
+import sys
+
+import threading
+from monitoring.tms_check import run_checker  # import your function
+from monitoring.offense_announcer import run_announcer_loop  # NEW import
+from monitoring.sms_announcer import run_sms_sender_loop
+
+
+if sys.platform.startswith("win"):
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+    
+# Start scraper in background thread once when urls.py is imported
+def start_scraper_thread():
+    thread = threading.Thread(target=run_checker, daemon=True)
+    threading.Thread(target=run_sms_sender_loop, daemon=True).start()
+    thread.start()
+
+
+# Start scraper and announcer in background threads
+def start_background_threads():
+    threading.Thread(target=run_checker, daemon=True).start()
+    threading.Thread(target=run_announcer_loop, daemon=True).start()  # NEW
+
+start_background_threads()
+start_scraper_thread()
+""""""
 
 sitemaps = {
     'static': StaticViewSitemap,

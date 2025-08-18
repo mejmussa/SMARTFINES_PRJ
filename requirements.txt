@@ -23,9 +23,11 @@ openpyxl
 pandas
 phonenumbers
 pillow
+playwright
 psycopg2
 python-barcode
 python-decouple
+pyttsx3
 qrcode
 redis
 requests-oauthlib

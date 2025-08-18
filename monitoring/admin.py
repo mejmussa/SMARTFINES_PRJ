@@ -1,8 +1,5 @@
 from django.contrib import admin
-from .models import TrafficOffense, Vehicle
-
-
-
+from .models import TrafficOffense
 
 @admin.register(TrafficOffense)
 class TrafficOffenseAdmin(admin.ModelAdmin):
@@ -16,10 +13,3 @@ class TrafficOffenseAdmin(admin.ModelAdmin):
     # This is optional but helps sorting by issued_date in admin list
     formatted_issued_date.admin_order_field = 'issued_date'
     formatted_issued_date.short_description = 'Issued Date'
-
-
-
-@admin.register(Vehicle)
-class VehicleAdmin(admin.ModelAdmin):
-    list_display = ['user', 'name', 'plate_number', 'created_at']
-    search_fields = ['plate_number', 'name']

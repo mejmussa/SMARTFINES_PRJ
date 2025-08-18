@@ -2,22 +2,9 @@ from django.db import models
 from accounts.models import User
 
 
-class Vehicle(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=50, null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    plate_number = models.CharField(max_length=20, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.user.email
-
-
 
 class TrafficOffense(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE)
     plate_number = models.CharField(max_length=20)
     reference = models.CharField(max_length=50)
     license = models.CharField(max_length=50)
@@ -34,8 +21,6 @@ class TrafficOffense(models.Model):
 
     def __str__(self):
         return f"{self.plate_number} - {self.reference}"
-    
-
 
 
 
