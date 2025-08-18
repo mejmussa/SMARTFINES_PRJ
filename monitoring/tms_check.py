@@ -9,12 +9,16 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import platform
+import urllib.request
+import zipfile
+from webdriver_manager.chrome import ChromeDriverManager
 
+# --------------------
 # Django setup
+# --------------------
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "smartfines_prj.settings")
 django.setup()
 
@@ -23,8 +27,35 @@ from accounts.models import User
 from .models import Vehicle
 from django.utils import timezone
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+system = platform.system()
+
 # Thread executor for DB writes
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=2)
+
+# --------------------
+# Helper to download Linux binaries
+# --------------------
+def download_and_extract(url, target_dir):
+    os.makedirs(target_dir, exist_ok=True)
+    zip_path = os.path.join(target_dir, "tmp.zip")
+    urllib.request.urlretrieve(url, zip_path)
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        zip_ref.extractall(target_dir)
+    os.remove(zip_path)
+
+if system == "Linux":
+    CHROME_URL = "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.68/linux64/chrome-linux64.zip"
+    CHROMEDRIVER_URL = "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.68/linux64/chromedriver-linux64.zip"
+
+    chrome_path = os.path.join(BASE_DIR, "bin/chromium/chrome")
+    chromedriver_path = os.path.join(BASE_DIR, "bin/chromedriver")
+
+    if not os.path.exists(chrome_path):
+        download_and_extract(CHROME_URL, os.path.join(BASE_DIR, "bin/chromium"))
+
+    if not os.path.exists(chromedriver_path):
+        download_and_extract(CHROMEDRIVER_URL, os.path.join(BASE_DIR, "bin"))
 
 # --------------------
 # DB Functions
@@ -82,7 +113,6 @@ def save_offenses_to_db(text, vehicle):
 
                 seen_references.add(reference)
 
-                # Update or create offense
                 obj, created = TrafficOffense.objects.update_or_create(
                     vehicle=vehicle,
                     reference=reference,
@@ -116,6 +146,7 @@ def save_offenses_to_db_threadsafe(text, vehicle):
     return executor.submit(save_offenses_to_db, text, vehicle).result()
 
 
+
 # --------------------
 # Selenium Scraper
 # --------------------
@@ -126,7 +157,6 @@ def check_plate(driver, plate):
     search_input.clear()
     search_input.send_keys(plate)
 
-    # Try clicking search button, fallback to Enter
     try:
         search_btn = driver.find_element(By.CSS_SELECTOR, "input[placeholder*='Search by Registration'] + button")
         search_btn.click()
@@ -139,11 +169,9 @@ def check_plate(driver, plate):
         )
         WebDriverWait(driver, 10).until(lambda d: len(modal.text.strip()) > 10)
         return modal.text
-
     except Exception as e:
         print(f"[x] ❌ Modal not found for {plate}: {e}")
         return None
-
     finally:
         try:
             close_btn = driver.find_element(By.CSS_SELECTOR, ".modal .close-btn")
@@ -151,30 +179,34 @@ def check_plate(driver, plate):
         except:
             pass
 
-
+# --------------------
+# Main runner
+# --------------------
 def run_checker():
     chrome_options = Options()
-    #chrome_options.headless = True
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
 
-    # Use webdriver-manager to get chromedriver
-    driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
-        options=chrome_options
-    )
-
-    # Explicitly tell Selenium to use chromium binary if needed
-    chrome_options.binary_location = "/usr/bin/chromium-browser"
+    if system == "Windows":
+        driver = webdriver.Chrome(
+            service=Service(ChromeDriverManager().install()),
+            options=chrome_options
+        )
+    else:  # Linux
+        chrome_bin = os.path.join(BASE_DIR, "bin/chromium/chrome")
+        chromedriver_bin = os.path.join(BASE_DIR, "bin/chromedriver")
+        chrome_options.binary_location = chrome_bin
+        driver = webdriver.Chrome(
+            service=Service(chromedriver_bin),
+            options=chrome_options
+        )
 
     try:
         while True:
-            # Fetch all vehicles in DB
             user_vehicles = Vehicle.objects.all()
-
             for vehicle in user_vehicles:
                 try:
                     modal_text = check_plate(driver, vehicle.plate_number)
@@ -185,7 +217,6 @@ def run_checker():
 
             print("\n[i] ✅ Round complete. Waiting 3600 seconds...\n")
             time.sleep(3600)
-
     finally:
         driver.quit()
 
