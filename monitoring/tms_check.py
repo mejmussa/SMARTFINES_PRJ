@@ -4,9 +4,9 @@ import os
 import django
 from datetime import datetime
 import concurrent.futures
-
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
@@ -159,10 +159,10 @@ def run_checker():
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--disable-extensions")
-    chrome_options.add_argument("--window-size=1920,1080") 
+    chrome_options.add_argument("--window-size=1920,1080")
 
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    # System ChromeDriver path
+    driver = webdriver.Chrome(service=Service("/usr/bin/chromedriver"), options=chrome_options)
 
     try:
         while True:
