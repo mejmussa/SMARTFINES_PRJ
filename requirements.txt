@@ -24,7 +24,6 @@ openpyxl
 pandas
 phonenumbers
 pillow
-playwright
 psycopg2-binary
 python-decouple
 redis
