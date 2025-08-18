@@ -1,345 +1,139 @@
-{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8" />
     <title>TMS CHECK - Traffic Offenses</title>
-    <link rel="icon" href="{% static 'favicon.jpg' %}" type="image/png">
-    <!-- FontAwesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
-
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
     <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: "Segoe UI", sans-serif;
-            background-color: #f0f2f5;
-        }
-
-        h1 {
-            text-align: center;
-            color: #1877F2;
-            margin-bottom: 25px;
-        }
-
-        .card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-            margin: 0 auto 20px;
-            max-width: 100%;
-        }
-
-        form.search-bar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-
-        form.search-bar input {
-            padding: 6px 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 0.95em;
-        }
-
-        form.search-bar button,
-        form.search-bar a {
-            padding: 6px 12px;
-            font-size: 0.95em;
-            border-radius: 4px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        form.search-bar button {
-            background-color: #1877F2;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        form.search-bar a {
-            background-color: #6c757d;
-            color: white;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.95em;
-        }
-
-        th, td {
-            padding: 10px;
-            border: 1px solid #f8f7f7;
-            text-align: left;
-        }
-
-        th {
-            background-color: #cfcfcf;
-            color: #333;
-        }
-
-        tr:nth-child(even) {
-            background-color: #e9e7e7;
-        }
-
-        .pagination {
-            margin-top: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .step-links a.custom-link {
-            text-decoration: none;
-            color: #1877F2;
-            font-weight: bold;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .pagination form {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            margin-left: 10px;
-        }
-
-        .pagination input[type="number"] {
-            width: 45px;
-            padding: 2px 5px;
-            font-size: 0.9em;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-        }
-
-        .pagination button {
-            padding: 2px 8px;
-            font-size: 0.9em;
-            border-radius: 3px;
-            border: 1px solid #1877F2;
-            background-color: #1877F2;
-            color: white;
-            cursor: pointer;
-        }
- 
         .modal { display: none; }
         .modal.show { display: block; }
         .log-container { max-height: 200px; overflow-y: auto; }
     </style>
 </head>
-<body>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <h1 class="text-2xl font-bold mb-4">TMS CHECK - Traffic Offenses</h1>
 
-<h1>TMS CHECK - Traffic Offenses</h1>
-
-<div class="card">
-    <form class="search-bar" method="get">
-        <input type="text" name="plate_number" placeholder="Plate Number" value="{{ request.GET.plate_number }}">
-        <input type="text" name="reference" placeholder="Reference" value="{{ request.GET.reference }}">
-        <input type="text" name="license" placeholder="License" value="{{ request.GET.license }}">
-        <input type="text" name="location" placeholder="Location" value="{{ request.GET.location }}">
-        <input type="text" name="offence" placeholder="Offence" value="{{ request.GET.offence }}">
-        <input type="text" name="status" placeholder="Status" value="{{ request.GET.status }}">
-        <input type="text" name="is_paid" placeholder="Is Paid (True/False)" value="{{ request.GET.is_paid }}">
-        <input type="text" name="issued_date" placeholder="Issued Date (YYYY-MM-DD)" value="{{ request.GET.issued_date }}">
-
-        <button type="submit"><i class="fas fa-search"></i> Search</button>
-
-        {% if request.GET %}
-        <a href="{% url 'home' %}"><i class="fas fa-times"></i> Reset</a>
-        {% endif %}
-    </form>
-</div>
-
-<div class="card">
-    <table>
-        <thead>
-            <tr>
-                <th>Plate Number</th>
-                <th>Reference</th>
-                <th>License</th>
-                <th>Location</th>
-                <th>Offence</th>
-                <th>Charge (TZS)</th>
-                <th>Penalty (TZS)</th>
-                <th>Status</th>
-                <th>Is Paid</th>
-                <th>Issued Date</th>
-                <th>Print</th> <!-- New column -->
-            </tr>
-        </thead>
-        <tbody>
-            {% for offense in page_obj %}
-            <tr>
-                <td>{{ offense.vehicle.plate_number }}</td>
-                <td>{{ offense.reference }}</td>
-                <td>{{ offense.license }}</td>
-                <td>{{ offense.location }}</td>
-                <td>{{ offense.offence }}</td>
-                <td>{{ offense.charge|floatformat:2 }}</td>
-                <td>{{ offense.penalty|floatformat:2 }}</td>
-                <td>{{ offense.status }}</td>
-                <td>{{ offense.is_paid }}</td>
-                <td>{{ offense.issued_date|date:"Y-m-d H:i:s" }}</td>
-                <td>
-                    <button onclick="printRow(this)">🖨️</button>
-                </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="11">No offenses found.</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-<!-- Modal for Check Status -->
-<div id="checkModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-    <div class="bg-white p-6 rounded shadow-lg max-w-md w-full">
-        <h2 class="text-xl font-bold mb-4">Checking Offenses</h2>
-        <p id="modalMessage">Checking vehicles...</p>
-        <div id="logContainer" class="log-container border p-2 mb-4">
-            {% for log in check_logs %}
-            <p>{{ log }}</p>
-            {% endfor %}
+        <div class="card bg-white shadow-md rounded p-4 mb-4">
+            <form class="search-bar flex flex-wrap gap-2" method="get">
+                <input type="text" name="plate_number" placeholder="Plate Number" value="{{ request.GET.plate_number }}" class="border p-2 rounded">
+                <input type="text" name="reference" placeholder="Reference" value="{{ request.GET.reference }}" class="border p-2 rounded">
+                <input type="text" name="license" placeholder="License" value="{{ request.GET.license }}" class="border p-2 rounded">
+                <input type="text" name="location" placeholder="Location" value="{{ request.GET.location }}" class="border p-2 rounded">
+                <input type="text" name="offence" placeholder="Offence" value="{{ request.GET.offence }}" class="border p-2 rounded">
+                <input type="text" name="status" placeholder="Status" value="{{ request.GET.status }}" class="border p-2 rounded">
+                <input type="text" name="is_paid" placeholder="Is Paid (True/False)" value="{{ request.GET.is_paid }}" class="border p-2 rounded">
+                <input type="text" name="issued_date" placeholder="Issued Date (YYYY-MM-DD)" value="{{ request.GET.issued_date }}" class="border p-2 rounded">
+                <button type="submit" class="bg-blue-500 text-white p-2 rounded"><i class="fas fa-search"></i> Search</button>
+                {% if request.GET %}
+                <a href="{% url 'home' %}" class="bg-gray-500 text-white p-2 rounded"><i class="fas fa-times"></i> Reset</a>
+                {% endif %}
+            </form>
         </div>
-        <button id="closeModal" class="bg-red-500 text-white p-2 rounded">Close</button>
-    </div>
-</div>
 
-<div class="pagination">
-    <span class="step-links">
-        {% if page_obj.has_previous %}
-            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1" class="custom-link"><i class="fas fa-angle-double-left"></i> First</a>
-            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" class="custom-link"><i class="fas fa-angle-left"></i> Prev</a>
-        {% endif %}
-
-        <span style="color: #1877F2; font-weight: bold;">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-        </span>
-
-        {% if page_obj.has_next %}
-            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" class="custom-link">Next <i class="fas fa-angle-right"></i></a>
-            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}" class="custom-link">Last <i class="fas fa-angle-double-right"></i></a>
-        {% endif %}
-    </span>
-
-    <form method="get">
-        {% for key, value in request.GET.items %}
-            {% if key != 'page' %}
-                <input type="hidden" name="{{ key }}" value="{{ value }}">
-            {% endif %}
-        {% endfor %}
-        <label for="page_input" style="font-weight: normal; font-size: 0.9em;">Go to page:</label>
-        <input type="number" id="page_input" name="page" min="1" max="{{ page_obj.paginator.num_pages }}" value="{{ page_obj.number }}" required>
-        <button type="submit"><i class="fas fa-arrow-right"></i></button>
-    </form>
-</div>
-
-<script>
-    function printRow(button) {
-        const row = button.closest('tr');
-        const rowData = Array.from(row.cells).map(cell => cell.innerText).join(' | ');
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write('<pre>' + rowData + '</pre>');
-        printWindow.document.close();
-        printWindow.print();
-    }
-
-    const modal = document.getElementById('checkModal');
-    const closeModalBtn = document.getElementById('closeModal');
-    const modalMessage = document.getElementById('modalMessage');
-    const logContainer = document.getElementById('logContainer');
-
-    {% if check_status == 'running' %}
-    modal.classList.add('show');
-    modalMessage.innerText = 'Checking vehicles: {{ user_vehicles|join:", " }}';
-    // Poll for task completion
-    function checkTaskStatus() {
-        fetch('/monitoring/check_status/?task_id={{ request.session.check_task_id }}')
-            .then(response => response.json())
-            .then(data => {
-                if (data.logs) {
-                    logContainer.innerHTML = data.logs.map(log => `<p>${log}</p>`).join('');
-                }
-                if (data.status === 'SUCCESS') {
-                    modalMessage.innerText = 'Check completed!';
-                    setTimeout(() => modal.classList.remove('show'), 2000);
-                } else if (data.status === 'FAILURE') {
-                    modalMessage.innerText = 'Check failed!';
-                    setTimeout(() => modal.classList.remove('show'), 2000);
-                } else {
-                    setTimeout(checkTaskStatus, 2000);
-                }
-            });
-    }
-    checkTaskStatus();
-    {% endif %}
-
-    closeModalBtn.addEventListener('click', () => {
-        modal.classList.remove('show');
-    });
-</script>
-
-<script>
-function printRow(button) {
-    const row = button.closest("tr").cloneNode(true);
-    // Remove the Print button column
-    row.removeChild(row.lastElementChild);
-
-    const newWindow = window.open('', '', 'width=800,height=600');
-    newWindow.document.write(`
-        <html>
-        <head>
-            <title>Print Offense</title>
-            <style>
-                body { font-family: Arial, sans-serif; padding: 20px; }
-                table { border-collapse: collapse; width: 100%; }
-                th, td { border: 1px solid #444; padding: 8px; text-align: left; }
-            </style>
-        </head>
-        <body>
-            <h3>Offense Details</h3>
-            <table>
+        <div class="card bg-white shadow-md rounded p-4 mb-4">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" name="trigger_check" class="bg-green-500 text-white p-2 rounded">Trigger Check</button>
+            </form>
+            <table class="w-full mt-4">
                 <thead>
-                    <tr>
-                        <th>Plate Number</th>
-                        <th>Reference</th>
-                        <th>License</th>
-                        <th>Location</th>
-                        <th>Offence</th>
-                        <th>Charge (TZS)</th>
-                        <th>Penalty (TZS)</th>
-                        <th>Status</th>
-                        <th>Is Paid</th>
-                        <th>Issued Date</th>
+                    <tr class="bg-gray-200">
+                        <th class="p-2">Plate Number</th>
+                        <th class="p-2">Reference</th>
+                        <th class="p-2">License</th>
+                        <th class="p-2">Location</th>
+                        <th class="p-2">Offence</th>
+                        <th class="p-2">Charge (TZS)</th>
+                        <th class="p-2">Penalty (TZS)</th>
+                        <th class="p-2">Status</th>
+                        <th class="p-2">Is Paid</th>
+                        <th class="p-2">Issued Date</th>
+                        <th class="p-2">Print</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${row.outerHTML}
+                    {% for offense in page_obj %}
+                    <tr>
+                        <td class="p-2">{{ offense.vehicle.plate_number }}</td>
+                        <td class="p-2">{{ offense.reference }}</td>
+                        <td class="p-2">{{ offense.license }}</td>
+                        <td class="p-2">{{ offense.location }}</td>
+                        <td class="p-2">{{ offense.offence }}</td>
+                        <td class="p-2">{{ offense.charge|floatformat:2 }}</td>
+                        <td class="p-2">{{ offense.penalty|floatformat:2 }}</td>
+                        <td class="p-2">{{ offense.status }}</td>
+                        <td class="p-2">{{ offense.is_paid }}</td>
+                        <td class="p-2">{{ offense.issued_date|date:"Y-m-d H:i:s" }}</td>
+                        <td class="p-2">
+                            <button onclick="printRow(this)" class="text-blue-500">🖨️</button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="11" class="p-2 text-center">No offenses found.</td></tr>
+                    {% endfor %}
                 </tbody>
             </table>
-            <script>
-                window.onload = function() {
-                    window.print();
-                    window.onafterprint = function() {
-                        window.close();
-                    };
-                };
-            <\/script>
-        </body>
-        </html>
-    `);
-    newWindow.document.close();
-}
-</script>
+        </div>
 
+        <!-- Modal for Check Status -->
+        <div id="checkModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div class="bg-white p-6 rounded shadow-lg max-w-md w-full">
+                <h2 class="text-xl font-bold mb-4">Checking Offenses</h2>
+                <p id="modalMessage">Checking vehicles...</p>
+                <div id="logContainer" class="log-container border p-2 mb-4">
+                    {% for log in check_logs %}
+                    <p>{{ log }}</p>
+                    {% endfor %}
+                </div>
+                <button id="closeModal" class="bg-red-500 text-white p-2 rounded">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function printRow(button) {
+            const row = button.closest('tr');
+            const rowData = Array.from(row.cells).map(cell => cell.innerText).join(' | ');
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write('<pre>' + rowData + '</pre>');
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        const modal = document.getElementById('checkModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const logContainer = document.getElementById('logContainer');
+
+        {% if check_status == 'running' %}
+        modal.classList.add('show');
+        modalMessage.innerText = 'Checking vehicles: {{ user_vehicles|join:", " }}';
+        // Poll for task completion
+        function checkTaskStatus() {
+            fetch('/monitoring/check_status/?task_id={{ request.session.check_task_id }}')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.logs) {
+                        logContainer.innerHTML = data.logs.map(log => `<p>${log}</p>`).join('');
+                    }
+                    if (data.status === 'SUCCESS') {
+                        modalMessage.innerText = 'Check completed!';
+                        setTimeout(() => modal.classList.remove('show'), 2000);
+                    } else if (data.status === 'FAILURE') {
+                        modalMessage.innerText = 'Check failed!';
+                        setTimeout(() => modal.classList.remove('show'), 2000);
+                    } else {
+                        setTimeout(checkTaskStatus, 2000);
+                    }
+                });
+        }
+        checkTaskStatus();
+        {% endif %}
+
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.remove('show');
+        });
+    </script>
 </body>
 </html>
