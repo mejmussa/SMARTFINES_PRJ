@@ -1,18 +1,16 @@
 FROM mcr.microsoft.com/playwright/python:v1.47.0-focal
 
-# Install only needed build deps
-RUN apt-get update && apt-get install -y \
-    gcc python3-dev libpq-dev \
- && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /app
 
+# Copy requirements first
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Browsers already installed in this image, no need for --with-deps
-RUN playwright install
-
+# Copy project code
 COPY . .
 
+# Collect static files if you use them
+RUN python manage.py collectstatic --noinput
+
+# Gunicorn entry
 CMD ["gunicorn", "smartfines_prj.wsgi:application", "--bind", "0.0.0.0:8000"]
