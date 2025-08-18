@@ -23,12 +23,11 @@ openpyxl
 pandas
 phonenumbers
 pillow
-playwright
 psycopg2-binary
-python-barcode
 python-decouple
-qrcode
 redis
+selenium>=4.14
+webdriver-manager>=4.1
 requests-oauthlib
 requests
 shortuuid
