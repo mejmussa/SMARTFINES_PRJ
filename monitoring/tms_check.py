@@ -174,7 +174,7 @@ def check_plate(page, plate):
 
 def run_checker():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False) # False OR True FOR GUI USAGE 
+        browser = p.chromium.launch(headless=True) # False OR True FOR GUI USAGE 
         page = browser.new_page()
 
         while True:
