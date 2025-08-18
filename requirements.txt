@@ -24,7 +24,7 @@ pandas
 phonenumbers
 pillow
 playwright
-psycopg2
+psycopg2-binary
 python-barcode
 python-decouple
 qrcode
