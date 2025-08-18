@@ -139,8 +139,8 @@ async def run_checker():
             except Exception as e:
                 print(f"[x] Error checking {vehicle.plate_number}: {e}")
 
-        print("\n[i] ✅ Round complete. Waiting 3600 seconds...\n")
-        await asyncio.sleep(3600)
+        print("\n[i] ✅ Round complete. Waiting 43,200 seconds...\n")
+        await asyncio.sleep(43200)
 
 if __name__ == "__main__":
     asyncio.run(run_checker())
