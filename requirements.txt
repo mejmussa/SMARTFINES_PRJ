@@ -1,5 +1,6 @@
 beautifulsoup4
 boto3
+celery
 channels
 daphne
 Django==5.2
@@ -23,11 +24,10 @@ openpyxl
 pandas
 phonenumbers
 pillow
+playwright
 psycopg2-binary
 python-decouple
 redis
-selenium
-webdriver-manager
 requests-oauthlib
 requests
 shortuuid

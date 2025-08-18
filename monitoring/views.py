@@ -5,6 +5,16 @@ from datetime import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .forms import VehicleForm
+import requests
+import base64
+from django.conf import settings
+from monitoring.models import Vehicle
+from monitoring.tms_check import run_checker
+import asyncio
+
+
+
+
 
 @login_required
 def vehicle_list(request):

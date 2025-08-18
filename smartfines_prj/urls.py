@@ -27,24 +27,8 @@ from django.views.generic import TemplateView
 from django.views.i18n import set_language
 from core.views import PWAServeView
 import asyncio
-import sys
 import threading
-from monitoring.tms_check import run_checker  # import your function
 
-
-
-if sys.platform.startswith("win"):
-    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
-
-# Start scraper in background thread once when urls.py is imported
-def start_scraper_thread():
-    thread = threading.Thread(target=run_checker, daemon=True)
-    thread.start()
-
-
-#start_background_threads()
-start_scraper_thread()
-""""""
 
 sitemaps = {
     'static': StaticViewSitemap,
@@ -61,6 +45,7 @@ urlpatterns = [
     path('59253ba4bbc8403d92d9fc251a422642.txt', serve, {'path': '59253ba4bbc8403d92d9fc251a422642.txt', 'document_root': settings.BASE_DIR / 'templates'}),
     path('pwa/<path:filename>', PWAServeView.as_view(), name='serve-pwa'),
 ]
+
 if settings.DEBUG:
     # Serve static and media files during development
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
