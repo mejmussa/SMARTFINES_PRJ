@@ -161,8 +161,14 @@ def run_checker():
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
 
-    # System ChromeDriver path
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    # Use webdriver-manager to get chromedriver
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager().install()),
+        options=chrome_options
+    )
+
+    # Explicitly tell Selenium to use chromium binary if needed
+    chrome_options.binary_location = "/usr/bin/chromium-browser"
 
     try:
         while True:
