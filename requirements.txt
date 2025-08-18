@@ -26,8 +26,8 @@ pillow
 psycopg2-binary
 python-decouple
 redis
-selenium>=4.14
-webdriver-manager>=4.1
+selenium
+webdriver-manager
 requests-oauthlib
 requests
 shortuuid
