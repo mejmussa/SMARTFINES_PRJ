@@ -27,6 +27,7 @@ psycopg2-binary
 python-decouple
 redis
 selenium
+webdriver-manager
 requests-oauthlib
 requests
 shortuuid
