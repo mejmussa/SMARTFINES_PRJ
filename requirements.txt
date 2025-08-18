@@ -1,6 +1,7 @@
 beautifulsoup4
 boto3
 celery
+django-celery-beat
 channels
 daphne
 Django==5.2

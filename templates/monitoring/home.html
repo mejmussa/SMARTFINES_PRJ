@@ -131,6 +131,10 @@
             color: white;
             cursor: pointer;
         }
+ 
+        .modal { display: none; }
+        .modal.show { display: block; }
+        .log-container { max-height: 200px; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -196,7 +200,19 @@
         </tbody>
     </table>
 </div>
-
+<!-- Modal for Check Status -->
+<div id="checkModal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white p-6 rounded shadow-lg max-w-md w-full">
+        <h2 class="text-xl font-bold mb-4">Checking Offenses</h2>
+        <p id="modalMessage">Checking vehicles...</p>
+        <div id="logContainer" class="log-container border p-2 mb-4">
+            {% for log in check_logs %}
+            <p>{{ log }}</p>
+            {% endfor %}
+        </div>
+        <button id="closeModal" class="bg-red-500 text-white p-2 rounded">Close</button>
+    </div>
+</div>
 
 <div class="pagination">
     <span class="step-links">
@@ -226,6 +242,52 @@
         <button type="submit"><i class="fas fa-arrow-right"></i></button>
     </form>
 </div>
+
+<script>
+    function printRow(button) {
+        const row = button.closest('tr');
+        const rowData = Array.from(row.cells).map(cell => cell.innerText).join(' | ');
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write('<pre>' + rowData + '</pre>');
+        printWindow.document.close();
+        printWindow.print();
+    }
+
+    const modal = document.getElementById('checkModal');
+    const closeModalBtn = document.getElementById('closeModal');
+    const modalMessage = document.getElementById('modalMessage');
+    const logContainer = document.getElementById('logContainer');
+
+    {% if check_status == 'running' %}
+    modal.classList.add('show');
+    modalMessage.innerText = 'Checking vehicles: {{ user_vehicles|join:", " }}';
+    // Poll for task completion
+    function checkTaskStatus() {
+        fetch('/monitoring/check_status/?task_id={{ request.session.check_task_id }}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.logs) {
+                    logContainer.innerHTML = data.logs.map(log => `<p>${log}</p>`).join('');
+                }
+                if (data.status === 'SUCCESS') {
+                    modalMessage.innerText = 'Check completed!';
+                    setTimeout(() => modal.classList.remove('show'), 2000);
+                } else if (data.status === 'FAILURE') {
+                    modalMessage.innerText = 'Check failed!';
+                    setTimeout(() => modal.classList.remove('show'), 2000);
+                } else {
+                    setTimeout(checkTaskStatus, 2000);
+                }
+            });
+    }
+    checkTaskStatus();
+    {% endif %}
+
+    closeModalBtn.addEventListener('click', () => {
+        modal.classList.remove('show');
+    });
+</script>
+
 <script>
 function printRow(button) {
     const row = button.closest("tr").cloneNode(true);

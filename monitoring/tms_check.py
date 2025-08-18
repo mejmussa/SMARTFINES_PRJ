@@ -105,7 +105,7 @@ def save_offenses_to_db(text, vehicle):
 async def check_plate(plate):
     try:
         response = requests.post(
-            "https://playwritepyprj-production.up.railway.app/api/automate",
+            "https://playwrite.smartfines.net/api/automate",
             json={"url": "https://tms.tpf.go.tz/", "plate": plate},
             timeout=30
         )

@@ -8,9 +8,18 @@ from .forms import VehicleForm
 import requests
 import base64
 from django.conf import settings
-from monitoring.models import Vehicle
-from monitoring.tms_check import run_checker
-import asyncio
+from monitoring.tasks import run_checker_task
+import json
+import logging
+from monitoring.tasks import run_checker_task
+from celery.result import AsyncResult
+from django.http import JsonResponse
+
+
+
+
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -53,15 +62,15 @@ def vehicle_delete(request, pk):
     return redirect("vehicle_list")
 
 
+
+
+logger = logging.getLogger(__name__)
+
 @login_required
 def index(request):
-    # Get all vehicles owned by the logged-in user
     user_vehicles = Vehicle.objects.filter(user=request.user)
-    
-    # Get offenses linked to these vehicles
     offenses = TrafficOffense.objects.filter(vehicle__in=user_vehicles).order_by('-issued_date')
 
-    # Get query parameters
     plate_number = request.GET.get('plate_number')
     reference = request.GET.get('reference')
     license = request.GET.get('license')
@@ -71,7 +80,6 @@ def index(request):
     is_paid = request.GET.get('is_paid')
     issued_date = request.GET.get('issued_date')
 
-    # Build filters
     if plate_number:
         offenses = offenses.filter(vehicle__plate_number__icontains=plate_number)
     if reference:
@@ -91,26 +99,54 @@ def index(request):
             offenses = offenses.filter(is_paid=False)
     if issued_date:
         try:
-            # Try parsing full datetime first
             parsed_date = datetime.strptime(issued_date, "%Y-%m-%d %H:%M:%S").date()
         except ValueError:
             try:
-                # Fallback: Try just date
                 parsed_date = datetime.strptime(issued_date, "%Y-%m-%d").date()
             except ValueError:
                 parsed_date = None
-
         if parsed_date:
             offenses = offenses.filter(issued_date__date=parsed_date)
 
-    # Pagination
-    paginator = Paginator(offenses, 10)  # Show 10 offenses per page
-    page_number = request.GET.get("page")
+    paginator = Paginator(offenses, 10)
+    page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+
+    if request.method == 'POST' and 'trigger_check' in request.POST:
+        task = run_checker_task.delay(request.user.id)
+        logger.info(f"Triggered check for user {request.user.id}, task ID: {task.id}")
+        request.session['check_task_id'] = task.id
+        request.session['check_logs'] = []
+        request.session['check_status'] = 'running'
 
     context = {
         "page_obj": page_obj,
-        "user_vehicles": user_vehicles,  # optional, in case you want to display user's vehicles
+        "user_vehicles": user_vehicles,
+        "check_status": request.session.get('check_status'),
+        "check_logs": request.session.get('check_logs', []),
     }
     return render(request, "monitoring/home.html", context)
 
+@login_required
+def check_status(request):
+    task_id = request.GET.get('task_id')
+    if not task_id:
+        return JsonResponse({'status': 'ERROR', 'message': 'No task ID provided'})
+    
+    task = AsyncResult(task_id)
+    logs = request.session.get('check_logs', [])
+    
+    if task.state == 'PENDING':
+        status = 'running'
+    elif task.state == 'SUCCESS':
+        status = 'SUCCESS'
+        request.session['check_status'] = 'completed'
+        request.session['check_logs'] = logs + [f"Check completed at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"]
+    elif task.state == 'FAILURE':
+        status = 'FAILURE'
+        request.session['check_status'] = 'failed'
+        request.session['check_logs'] = logs + [f"Check failed: {str(task.result)}"]
+    else:
+        status = task.state
+    
+    return JsonResponse({'status': status, 'logs': request.session.get('check_logs', [])})

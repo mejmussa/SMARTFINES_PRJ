@@ -44,12 +44,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
     'django.contrib.humanize',
-
     'accounts',
     'core',
     'monitoring',
-
-  
     'django_countries',
     'channels',
     'storages',
@@ -58,8 +55,20 @@ INSTALLED_APPS = [
     'import_export',
     'rest_framework',
     'whitenoise.runserver_nostatic',
+    'django_celery_beat',
 ]
 
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_BEAT_SCHEDULE = {
+    'run-checker-every-hour': {
+        'task': 'monitoring.tasks.run_checker_task',
+        'schedule': 3600.0,
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -143,7 +152,7 @@ WSGI_APPLICATION = 'smartfines_prj.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 
-"""if DEBUG:
+if DEBUG:
     # Local PSQL DB
     DATABASES = {
         'default': {
@@ -166,14 +175,14 @@ else:
             'HOST': config('DB_HOST_RAILWAY'),
             'PORT': config('DB_PORT_RAILWAY', cast=int),
         }
-    }"""
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
     }
-}
+
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': BASE_DIR / 'db.sqlite3',
+#    }
+#}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
