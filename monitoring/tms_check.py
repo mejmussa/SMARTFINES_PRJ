@@ -6,6 +6,8 @@ import requests
 from django.utils import timezone
 from datetime import datetime
 from asgiref.sync import sync_to_async
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 # Only setup Django if running standalone
 if __name__ == "__main__":
@@ -26,8 +28,7 @@ def mark_offenses_as_paid_if_missing(vehicle, current_modal_text):
             offense.save()
             print(f"[✔] Marked as PAID: {offense.vehicle.plate_number} - {offense.reference}")
 
-@sync_to_async
-def save_offenses_to_db(text, vehicle):
+async def save_offenses_to_db(text, vehicle):
     from monitoring.models import TrafficOffense
     from accounts.models import User
 
@@ -38,7 +39,7 @@ def save_offenses_to_db(text, vehicle):
 
     if "No pending offences found." in text:
         print("🟢 No pending offences found.")
-        mark_offenses_as_paid_if_missing(vehicle, text)
+        await mark_offenses_as_paid_if_missing(vehicle, text)
         return
 
     lines = [line.strip() for line in text.splitlines() if line.strip()]
@@ -67,13 +68,13 @@ def save_offenses_to_db(text, vehicle):
                     continue
 
                 _, reference, license_no, location, offence = prefix_parts
-                issued_date = timezone.make_aware(
+                issued_date = await sync_to_async(timezone.make_aware)(
                     datetime.strptime(issued.strip(), "%Y-%m-%d %H:%M:%S")
                 )
 
                 seen_references.add(reference)
 
-                obj, created = TrafficOffense.objects.update_or_create(
+                obj, created = await sync_to_async(TrafficOffense.objects.update_or_create)(
                     vehicle=vehicle,
                     reference=reference,
                     defaults={
@@ -88,7 +89,6 @@ def save_offenses_to_db(text, vehicle):
                     }
                 )
 
-
                 if created:
                     print(f"[✔] Saved new offense: {reference}")
                 else:
@@ -99,15 +99,21 @@ def save_offenses_to_db(text, vehicle):
                 import traceback
                 traceback.print_exc()
 
-    mark_offenses_as_paid_if_missing(vehicle, text)
+    await mark_offenses_as_paid_if_missing(vehicle, text)
     print("=" * 60)
 
 async def check_plate(plate):
+    # Set up retry strategy
+    session = requests.Session()
+    retries = Retry(total=3, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+    session.mount("https://", HTTPAdapter(max_retries=retries))
+
     try:
-        response = requests.post(
+        response = session.post(
             "https://playwritepyprj-production.up.railway.app/api/automate",
             json={"url": "https://tms.tpf.go.tz/", "plate": plate},
-            timeout=30
+            timeout=60,  # Increased timeout
+            stream=True  # Enable streaming for large responses
         )
         response.raise_for_status()
         data = response.json()
@@ -124,12 +130,17 @@ async def check_plate(plate):
     except requests.RequestException as e:
         print(f"[x] ❌ API request failed for {plate}: {str(e)}")
         return None
+    finally:
+        session.close()
 
 async def run_checker():
     from monitoring.models import Vehicle
 
     while True:
         user_vehicles = await sync_to_async(lambda: list(Vehicle.objects.all()))()
+
+        # Log the number of vehicles to check for duplicates
+        print(f"[i] Checking {len(user_vehicles)} vehicles: {[v.plate_number for v in user_vehicles]}")
 
         for vehicle in user_vehicles:
             try:
@@ -144,3 +155,5 @@ async def run_checker():
 
 if __name__ == "__main__":
     asyncio.run(run_checker())
+
+    
