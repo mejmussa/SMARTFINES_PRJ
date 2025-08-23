@@ -1,0 +1,88 @@
+{% extends "monitoring/base.html" %}
+{% block content %}
+<main class="container-fluid mt-3 px-3">
+    <h2>{{ title }}</h2>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-center"><input type="checkbox" onclick="toggleAll(this)"></th>
+                            <th>Plate</th>
+                            <th>Ref</th>
+                            <th>License</th>
+                            <th>Offence</th>
+                            <th>Charge (TZS)</th>
+                            <th>Penalty (TZS)</th>
+                            <th>Status</th>
+                            <th>Paid</th>
+                            <th>Date</th>
+                            <th>Print</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for offense in page_obj %}
+                        <tr>
+                            <td class="text-center"><input type="checkbox" name="selected"></td>
+                            <td>{{ offense.vehicle.plate_number }}</td>
+                            <td>{{ offense.reference }}</td>
+                            <td>{{ offense.license }}</td>
+                            <td>{{ offense.offence }}</td>
+                            <td>{{ offense.charge|floatformat:2 }}</td>
+                            <td>{{ offense.penalty|floatformat:2 }}</td>
+                            <td><span class="badge {% if offense.status == 'Pending' %}bg-warning text-dark{% else %}bg-success{% endif %}">{{ offense.status }}</span></td>
+                            <td>{{ offense.is_paid|yesno:"Yes,No" }}</td>
+                            <td>{{ offense.issued_date|date:"Y-m-d" }}</td>
+                            <td><button class="btn btn-outline-primary btn-sm" onclick="printRow(this)"><i class="fas fa-print"></i></button></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="11" class="text-center">No offenses found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="custom-link"><i class="fas fa-angle-double-left"></i> First</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="custom-link"><i class="fas fa-angle-left"></i> Prev</a>
+            {% endif %}
+            <span style="color: #1877F2; font-weight: bold;">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="custom-link">Next <i class="fas fa-angle-right"></i></a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="custom-link">Last <i class="fas fa-angle-double-right"></i></a>
+            {% endif %}
+        </span>
+        <form method="get">
+            <label for="page_input" style="font-weight: normal; font-size: 0.9em;">Go to page:</label>
+            <input type="number" id="page_input" name="page" min="1" max="{{ page_obj.paginator.num_pages }}" value="{{ page_obj.number }}" required>
+            <button type="submit"><i class="fas fa-arrow-right"></i></button>
+        </form>
+    </div>
+</main>
+<script>
+    function toggleAll(checkbox) {
+        document.querySelectorAll('input[name="selected"]').forEach(cb => cb.checked = checkbox.checked);
+    }
+    function printRow(button) {
+        const row = button.closest("tr").cloneNode(true);
+        row.removeChild(row.lastElementChild);
+        const w = window.open('', '', 'width=800,height=600');
+        w.document.write(`
+            <html>
+            <head><title>Print</title></head>
+            <body onload="window.print();window.onafterprint=function(){window.close();}">
+                <h3>Offense Details</h3>
+                <table border="1" cellpadding="8">${row.outerHTML}</table>
+            </body>
+            </html>
+        `);
+        w.document.close();
+    }
+</script>
+{% endblock %}

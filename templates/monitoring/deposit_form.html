@@ -1,0 +1,12 @@
+{% extends "monitoring/base.html" %}
+{% block content %}
+<main class="container-fluid mt-3 px-3">
+    <h2>{{ title }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Deposit</button>
+        <a href="{% url 'balance_history' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</main>
+{% endblock %}

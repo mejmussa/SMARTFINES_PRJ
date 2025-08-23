@@ -1,0 +1,32 @@
+{% extends "monitoring/base.html" %}
+{% block content %}
+<main class="container-fluid mt-3 px-3">
+    <h2>{{ title }}</h2>
+    {% if form.errors %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <ul class="mb-0">
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+    <p><strong>Valid Tanzanian Plate Formats:</strong> 
+        Private/Commercial (e.g., T123ABC); Government (e.g., G1234 or G12345); 
+        Taxi/Bus (e.g., T123TAX or T123BUS); Diplomatic (e.g., 123CD45); 
+        Military (e.g., TZ1234)
+    </p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'vehicle_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</main>
+{% endblock %}

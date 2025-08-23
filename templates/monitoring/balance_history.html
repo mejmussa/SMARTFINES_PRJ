@@ -1,0 +1,96 @@
+{% extends "monitoring/base.html" %}
+{% block content %}
+<main class="container-fluid mt-3 px-3">
+    <h2>Balance History</h2>
+    <a href="{% url 'deposit' %}" class="btn btn-primary mb-3"><i class="fas fa-plus-circle"></i> Deposit Funds</a>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Amount (TZS)</th>
+                            <th>Description</th>
+                            <th>Related Offense</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in page_obj %}
+                        <tr>
+                            <td>{{ transaction.created_at|date:"Y-m-d H:i" }}</td>
+                            <td>{{ transaction.get_transaction_type_display }}</td>
+                            <td>{{ transaction.amount|floatformat:2 }}</td>
+                            <td>{{ transaction.description|default:"-" }}</td>
+                            <td>{{ transaction.related_offense|default:"-" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center">No transactions found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1" class="custom-link"><i class="fas fa-angle-double-left"></i> First</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="custom-link"><i class="fas fa-angle-left"></i> Prev</a>
+            {% endif %}
+            <span style="color: #1877F2; font-weight: bold;">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="custom-link">Next <i class="fas fa-angle-right"></i></a>
+                <a href="?page={{ page_obj.paginator.num_pages }}" class="custom-link">Last <i class="fas fa-angle-double-right"></i></a>
+            {% endif %}
+        </span>
+        <form method="get">
+            <label for="page_input" style="font-weight: normal; font-size: 0.9em;">Go to page:</label>
+            <input type="number" id="page_input" name="page" min="1" max="{{ page_obj.paginator.num_pages }}" value="{{ page_obj.number }}" required>
+            <button type="submit"><i class="fas fa-arrow-right"></i></button>
+        </form>
+    </div>
+</main>
+<style>
+    .pagination {
+        margin-top: 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+    .step-links a.custom-link {
+        text-decoration: none;
+        color: #1877F2;
+        font-weight: bold;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .pagination form {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-left: 10px;
+    }
+    .pagination input[type="number"] {
+        width: 45px;
+        padding: 2px 5px;
+        font-size: 0.9em;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+    }
+    .pagination button {
+        padding: 2px 8px;
+        font-size: 0.9em;
+        border-radius: 3px;
+        border: 1px solid #1877F2;
+        background-color: #1877F2;
+        color: white;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}

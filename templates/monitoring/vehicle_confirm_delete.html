@@ -1,0 +1,12 @@
+{% extends "monitoring/base.html" %}
+{% block content %}
+<main class="container-fluid mt-3 px-3">
+    <h2>Delete Vehicle</h2>
+    <p>Are you sure you want to delete the vehicle "{{ vehicle.plate_number }}"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <a href="{% url 'vehicle_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</main>
+{% endblock %}

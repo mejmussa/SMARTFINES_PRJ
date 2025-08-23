@@ -1,0 +1,40 @@
+{% extends "monitoring/base.html" %}
+{% block content %}
+<main class="container-fluid mt-3 px-3">
+    <h2>My Vehicles</h2>
+    <a href="{% url 'vehicle_add' %}" class="btn btn-primary mb-3"><i class="fas fa-plus"></i> Add Vehicle</a>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th>Plate Number</th>
+                            <th>Make</th>
+                            <th>Model</th>
+                            <th>Year</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vehicle in vehicles %}
+                        <tr>
+                            <td>{{ vehicle.plate_number }}</td>
+                            <td>{{ vehicle.make|default:"-" }}</td>
+                            <td>{{ vehicle.model|default:"-" }}</td>
+                            <td>{{ vehicle.year|default:"-" }}</td>
+                            <td>
+                                <a href="{% url 'vehicle_edit' vehicle.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'vehicle_delete' vehicle.pk %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="text-center">No vehicles found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
