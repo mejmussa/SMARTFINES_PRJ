@@ -344,7 +344,7 @@
                         {% if request.user.is_authenticated and request.user.image %}
                             <img src="{{ request.user.image.url }}" alt="DP" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                         {% else %}
-                            <img src="{% static 'images/default_user.png' %}" alt="DP" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                            <img src="{% static 'images/default.jpg' %}" alt="DP" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                         {% endif %}
                         <span class="navbar-user-text"></span>
                     </a>
