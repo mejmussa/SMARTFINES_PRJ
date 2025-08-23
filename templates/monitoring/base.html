@@ -98,7 +98,7 @@
             font-size: 1.1rem;
             font-weight: 600;
             color: var(--text-primary);
-            max-width: calc(280px - 48px - 8px - 40px); /* Sidebar width - image width - gap - padding */
+            max-width: calc(280px - 48px - 8px - 40px);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -375,7 +375,7 @@
                 <span>SmartFines</span>
             </div>
             <div class="user-container">
-                <img src="{{ request.user.image.url }}" alt="DP" />
+                <img src="{{ request.user.image.url|default:'/static/images/default_user.png' }}" alt="DP" />
                 <span>{{ request.user.username|title }}</span>
             </div>
         </div>
@@ -552,14 +552,23 @@
                 closeSidebar();
             }
         });
+        // Prevent double-tap zooming on non-interactive elements
+        let lastTouchEnd = 0;
         document.addEventListener('touchend', (e) => {
             const now = Date.now();
+            // Only prevent default for rapid taps on non-interactive elements
             if (now - lastTouchEnd <= 300) {
-                e.preventDefault();
+                const target = e.target;
+                // Allow default behavior for interactive elements (links, buttons, inputs, etc.)
+                if (!target.closest('a, button, input, select, textarea, [role="button"]')) {
+                    // Allow pull-to-refresh if at the top of the page
+                    if (window.scrollY > 0) {
+                        e.preventDefault();
+                    }
+                }
             }
             lastTouchEnd = now;
         }, { passive: false });
-        let lastTouchEnd = 0;
     </script>
 </body>
 </html>
