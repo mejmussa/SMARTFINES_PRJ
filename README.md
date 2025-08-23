@@ -3,7 +3,7 @@
 
     
     git add .
-    git commit -m " AUG 23 2025"
+    git commit -m "23 AUG 2025"
     git push origin main
 
     
