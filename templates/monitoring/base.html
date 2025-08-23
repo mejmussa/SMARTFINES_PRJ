@@ -375,7 +375,7 @@
                 <span>SmartFines</span>
             </div>
             <div class="user-container">
-                <img src="{{ request.user.image.url|default:'/static/default.jpg' }}" alt="DP" />
+                <img src="{{ request.user.image.url }}" alt="DP" />
                 <span>{{ request.user.username|title }}</span>
             </div>
         </div>
