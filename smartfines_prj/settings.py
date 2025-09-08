@@ -218,26 +218,8 @@ USE_TZ = True
 # Languages you support
 LANGUAGES = [
     ('en', 'English'),
-    ('es', 'Español'),  # Spanish
-    ('fr', 'Français'),  # French
-    ('de', 'Deutsch'),  # German
-    ('zh-hans', '简体中文'),  # Simplified Chinese
-    ('zh-hant', '繁體中文'),  # Traditional Chinese
-    ('ar', 'العربية'),  # Arabic
-    ('hi', 'हिन्दी'),  # Hindi
-    ('pt', 'Português'),  # Portuguese
-    ('ru', 'Русский'),  # Russian
-    ('ja', '日本語'),  # Japanese
-    ('ko', '한국어'),  # Korean
-    ('it', 'Italiano'),  # Italian
-    ('tr', 'Türkçe'),  # Turkish
-    ('vi', 'Tiếng Việt'),  # Vietnamese
     ('sw', 'Kiswahili'),  # Swahili
-    ('pl', 'Polski'),  # Polish
-    ('bn', 'বাংলা'),  # Bengali
-    ('ur', 'اردو'),  # Urdu
-    ('mr', 'मराठी'),  # Marathi
-    ('ta', 'தமிழ்'),  # Tamil
+
 ]
 
 LOCALE_PATHS = [
