@@ -60,9 +60,9 @@ wget --mirror --convert-links --adjust-extension --page-requisites --no-parent -
     py manage.py runserver
 
 
-    postgres=# CREATE DATABASE tespos_prj;
+    postgres=# CREATE DATABASE smartfines_prj;
     #### for postgres 14 or even in there never use it postgres=# CREATE USER mussamej WITH PASSWORD 'mj5050mj';
-    postgres=# GRANT ALL PRIVILEGES ON DATABASE tespos_prj TO postgres;
+    postgres=# GRANT ALL PRIVILEGES ON DATABASE smartfines_prj TO postgres;
     
     
     List Tables: \l
@@ -70,7 +70,7 @@ wget --mirror --convert-links --adjust-extension --page-requisites --no-parent -
     Delete User: 
 
 
-    postgres=# DROP DATABASE tespos_prj;
+    postgres=# DROP DATABASE smartfines_prj;
 
     ########## FOR PSQL 16 AND ABOVE USER WE CREATE LOCALLY NEEDS TO HAVE ADMIN PRIVILEGES TO CREATE TABLES ###########
     ALTER USER mussamej WITH SUPERUSER; or use postgres default user

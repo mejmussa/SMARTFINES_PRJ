@@ -14,11 +14,10 @@ from django.core.files.base import ContentFile
 
 # ✅ Update this with your real plain text client secret
 # PRODUCTION SECRETS
-CLIENT_ID = 'dDiY9bAHIWtDQs85ZMTkA6CTcKhFDKG0sO9mreM9'
-CLIENT_SECRET = 'tPge9MpdA9yvExcrzENRsiIPPOJSVBeER8enxryHiCTMg2tOqGQagJuxPo2vfX7PTpOmMLDtIMK5osMiLHz7gpuGCgVBzKYkOyZbnclmu7pxQLoMRNcisMayOt2DfYrb'
+CLIENT_ID = 'Vk4dqQXRccKiRmL49LcvrJn7bcbZjWcPNqxLAeMZ'
+CLIENT_SECRET='txrqtxbxBT28IVg9eOck21CqDvwor8ED1nt8pEXNRLG4S7DENP1V2kh1kH6AN0PaC9LWp4JSwLsuAY4Klz8Xg01JCW36rIVhlazDz8xPrfo6ZN2X1XahtOaCVYT3Ksqt'
 REDIRECT_URI = 'https://smartfines.net/oauth/callback/'
 AUTH_SERVER_BASE_URL = 'https://accounts.tecmocsy.com'  # ❌ no trailing slash
-
 
 
 oauth_logger = logging.getLogger('oauth')
