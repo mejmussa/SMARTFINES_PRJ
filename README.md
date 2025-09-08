@@ -6,7 +6,7 @@
     git commit -m "08 SEP 2025"
     git push origin main
 
-
+#
 
     
     py manage.py runserver
