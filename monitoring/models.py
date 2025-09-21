@@ -1,5 +1,6 @@
 from django.db import models
 from accounts.models import User
+from datetime import timedelta
 
 class Vehicle(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="vehicles")
@@ -10,6 +11,8 @@ class Vehicle(models.Model):
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    check_interval = models.PositiveIntegerField(default=43200)  # seconds, default 12 hours
+    last_checked = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.plate_number} ({self.user.username})"

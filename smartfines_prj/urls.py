@@ -26,8 +26,7 @@ from core.sitemaps import StaticViewSitemap
 from django.views.generic import TemplateView
 from django.views.i18n import set_language
 from core.views import PWAServeView
-import asyncio
-import threading
+
 
 sitemaps = {
     'static': StaticViewSitemap,

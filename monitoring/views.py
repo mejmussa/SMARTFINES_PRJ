@@ -71,6 +71,7 @@ def index(request):
     }
     return render(request, "monitoring/home.html", context)
 
+
 @login_required
 def vehicle_list(request):
     vehicles = Vehicle.objects.filter(user=request.user)
@@ -100,7 +101,23 @@ def vehicle_edit(request, pk):
             messages.success(request, "Vehicle updated successfully.")
             return redirect("vehicle_list")
     else:
-        form = VehicleForm(instance=vehicle)
+        # Prepopulate check_interval_value and check_interval_unit
+        check_interval = vehicle.check_interval
+        if check_interval >= 86400:  # Days
+            form = VehicleForm(
+                instance=vehicle,
+                initial={'check_interval_value': check_interval // 86400, 'check_interval_unit': 'days'}
+            )
+        elif check_interval >= 3600:  # Hours
+            form = VehicleForm(
+                instance=vehicle,
+                initial={'check_interval_value': check_interval // 3600, 'check_interval_unit': 'hours'}
+            )
+        else:  # Minutes
+            form = VehicleForm(
+                instance=vehicle,
+                initial={'check_interval_value': check_interval // 60, 'check_interval_unit': 'minutes'}
+            )
     return render(request, "monitoring/vehicle_form.html", {"form": form, "title": "Edit Vehicle"})
 
 @login_required

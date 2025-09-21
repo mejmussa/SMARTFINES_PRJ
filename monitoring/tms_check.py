@@ -4,10 +4,11 @@ import asyncio
 import re
 import requests
 from django.utils import timezone
-from datetime import datetime
+from datetime import datetime, timedelta
 from asgiref.sync import sync_to_async
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+from collections import deque
 
 # Only setup Django if running standalone
 if __name__ == "__main__":
@@ -105,14 +106,14 @@ async def save_offenses_to_db(text, vehicle):
 async def check_plate(plate):
     # Set up retry strategy
     session = requests.Session()
-    retries = Retry(total=3, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+    retries = Retry(total=5, backoff_factor=2, status_forcelist=[429, 500, 502, 503, 504])
     session.mount("https://", HTTPAdapter(max_retries=retries))
 
     try:
         response = session.post(
             "https://playwritepyprj-production.up.railway.app/api/automate",
             json={"url": "https://tms.tpf.go.tz/", "plate": plate},
-            timeout=60,  # Increased timeout
+            timeout=120,  # Increased timeout
             stream=True  # Enable streaming for large responses
         )
         response.raise_for_status()
@@ -135,25 +136,58 @@ async def check_plate(plate):
 
 async def run_checker():
     from monitoring.models import Vehicle
+    check_queue = deque()
+
+    async def process_vehicle(vehicle):
+        try:
+            modal_text = await check_plate(vehicle.plate_number)
+            if modal_text:
+                await save_offenses_to_db(modal_text, vehicle)
+            now = timezone.now()
+            await sync_to_async(setattr)(vehicle, 'last_checked', now)
+            await sync_to_async(vehicle.save)()
+        except Exception as e:
+            print(f"[x] Error checking {vehicle.plate_number}: {e}")
 
     while True:
+        # Fetch vehicles and build queue of those due for checking
         user_vehicles = await sync_to_async(lambda: list(Vehicle.objects.all()))()
-
-        # Log the number of vehicles to check for duplicates
-        print(f"[i] Checking {len(user_vehicles)} vehicles: {[v.plate_number for v in user_vehicles]}")
-
+        now = timezone.now()
+        check_queue.clear()  # Clear queue to avoid duplicates
         for vehicle in user_vehicles:
-            try:
-                modal_text = await check_plate(vehicle.plate_number)
-                if modal_text:
-                    await save_offenses_to_db(modal_text, vehicle)
-            except Exception as e:
-                print(f"[x] Error checking {vehicle.plate_number}: {e}")
+            if vehicle.last_checked is None or (now - vehicle.last_checked).total_seconds() >= vehicle.check_interval:
+                check_queue.append(vehicle)
 
-        print("\n[i] ✅ Round complete. Waiting 43,200 seconds...\n")
-        await asyncio.sleep(43200)
+        # Log the queue
+        print(f"[i] Queue size: {len(check_queue)} vehicles to check: {[v.plate_number for v in check_queue]}")
+
+        # Process queue sequentially
+        while check_queue:
+            vehicle = check_queue.popleft()
+            print(f"[i] Processing vehicle: {vehicle.plate_number}")
+            await process_vehicle(vehicle)
+
+        # If no vehicles, stop the loop
+        if not user_vehicles:
+            print("[i] No vehicles in database. Stopping checker.")
+            break
+
+        # Calculate sleep time until the next vehicle is due
+        user_vehicles = await sync_to_async(lambda: list(Vehicle.objects.all()))()
+        if not user_vehicles:
+            print("[i] No vehicles in database after processing. Stopping checker.")
+            break
+
+        next_checks = [
+            (vehicle.last_checked + timedelta(seconds=vehicle.check_interval) - now).total_seconds()
+            for vehicle in user_vehicles if vehicle.last_checked is not None
+        ]
+        if not next_checks:
+            print("[i] No vehicles with checks scheduled. Stopping checker.")
+            break
+        sleep_time = max(1, min(next_checks))  # Sleep until next due check, minimum 1 second
+        print(f"[i] ✅ Queue processed. Waiting {sleep_time:.0f} seconds for next due vehicle...")
+        await asyncio.sleep(sleep_time)
 
 if __name__ == "__main__":
     asyncio.run(run_checker())
-
-    
