@@ -305,7 +305,7 @@ RATELIMIT_RATE = '5/m'
 
 AUTH_USER_MODEL = 'accounts.User'
 
-LOGIN_URL = '/login/'
+LOGIN_URL = '/accounts/'
 
 # Zepto Mail SMTP Configuration
 EMAIL_BACKEND = config('EMAIL_BACKEND')
