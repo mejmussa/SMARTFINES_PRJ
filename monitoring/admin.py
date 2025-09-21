@@ -19,9 +19,9 @@ class TrafficOffenseAdmin(admin.ModelAdmin):
 
 @admin.register(Vehicle)
 class VehicleAdmin(admin.ModelAdmin):
-    list_display = ["plate_number", "user", "make", "model", "year", "created_at"]
-    search_fields = ["plate_number", "make", "model", "user__username"]
-    list_filter = ["make", "year", "user"]
+    list_display = ["plate_number", "user", "created_at"]
+    search_fields = ["plate_number", "user__username"]
+    list_filter = ["user"]
 
 @admin.register(Balance)
 class BalanceAdmin(admin.ModelAdmin):

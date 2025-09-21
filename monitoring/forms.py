@@ -21,12 +21,9 @@ class VehicleForm(forms.ModelForm):
 
     class Meta:
         model = Vehicle
-        fields = ['plate_number', 'make', 'model', 'year', 'description', 'check_interval_value', 'check_interval_unit']
+        fields = ['plate_number', 'description', 'check_interval_value', 'check_interval_unit']
         widgets = {
             'plate_number': forms.TextInput(attrs={'class': 'form-control'}),
-            'make': forms.TextInput(attrs={'class': 'form-control'}),
-            'model': forms.TextInput(attrs={'class': 'form-control'}),
-            'year': forms.NumberInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
         }
 

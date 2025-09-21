@@ -10,9 +10,7 @@
                     <thead>
                         <tr>
                             <th>Plate Number</th>
-                            <th>Make</th>
-                            <th>Model</th>
-                            <th>Year</th>
+                            <th>Description</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -20,9 +18,7 @@
                         {% for vehicle in vehicles %}
                         <tr>
                             <td>{{ vehicle.plate_number }}</td>
-                            <td>{{ vehicle.make|default:"-" }}</td>
-                            <td>{{ vehicle.model|default:"-" }}</td>
-                            <td>{{ vehicle.year|default:"-" }}</td>
+                            <td>{{ vehicle.description|default:"-" }}</td>
                             <td>
                                 <a href="{% url 'vehicle_edit' vehicle.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
                                 <a href="{% url 'vehicle_delete' vehicle.pk %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>

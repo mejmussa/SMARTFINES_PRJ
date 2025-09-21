@@ -5,9 +5,6 @@ from datetime import timedelta
 class Vehicle(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="vehicles")
     plate_number = models.CharField(max_length=20, unique=True)
-    make = models.CharField(max_length=50, blank=True, null=True)
-    model = models.CharField(max_length=50, blank=True, null=True)
-    year = models.PositiveSmallIntegerField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
