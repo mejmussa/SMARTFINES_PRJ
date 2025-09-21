@@ -5,8 +5,18 @@
     <p>Are you sure you want to delete the vehicle "{{ vehicle.plate_number }}"?</p>
     <form method="post">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Delete</button>
-        <a href="{% url 'vehicle_list' %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-danger btn-custom" id="deleteVehicleBtn">
+            <span class="btn-text">Delete</span>
+            <span class="btn-spinner" style="display: none;">
+                <span class="spinner"></span>
+            </span>
+        </button>
+        <a href="{% url 'vehicle_list' %}" class="btn btn-secondary btn-custom" id="cancelDeleteLink">
+            <span class="btn-text">Cancel</span>
+            <span class="btn-spinner" style="display: none;">
+                <span class="spinner"></span>
+            </span>
+        </a>
     </form>
 </main>
 {% endblock %}

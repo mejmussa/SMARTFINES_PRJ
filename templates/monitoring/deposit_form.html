@@ -5,8 +5,18 @@
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Deposit</button>
-        <a href="{% url 'balance_history' %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary btn-custom" id="depositBtn">
+            <span class="btn-text">Deposit</span>
+            <span class="btn-spinner" style="display: none;">
+                <span class="spinner"></span>
+            </span>
+        </button>
+        <a href="{% url 'balance_history' %}" class="btn btn-secondary btn-custom" id="cancelDepositLink">
+            <span class="btn-text">Cancel</span>
+            <span class="btn-spinner" style="display: none;">
+                <span class="spinner"></span>
+            </span>
+        </a>
     </form>
 </main>
 {% endblock %}

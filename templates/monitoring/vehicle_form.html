@@ -17,28 +17,11 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% endif %}
-    <p><strong>Valid Tanzanian Plate Formats:</strong> 
-        Private/Commercial (e.g., T123ABC); Government (e.g., G1234 or G12345); 
-        Taxi/Bus (e.g., T123TAX or T123BUS); Diplomatic (e.g., 123CD45); 
-        Military (e.g., TZ1234)
-    </p>
-    <form method="post">
+    <form method="post" id="vehicleForm">
         {% csrf_token %}
         <div class="mb-3">
             {{ form.plate_number.label_tag }}
             {{ form.plate_number }}
-        </div>
-        <div class="mb-3">
-            {{ form.make.label_tag }}
-            {{ form.make }}
-        </div>
-        <div class="mb-3">
-            {{ form.model.label_tag }}
-            {{ form.model }}
-        </div>
-        <div class="mb-3">
-            {{ form.year.label_tag }}
-            {{ form.year }}
         </div>
         <div class="mb-3">
             {{ form.description.label_tag }}
@@ -58,8 +41,15 @@
                 Select how often to check for fines. Maximum: 60 minutes, 24 hours, or 6 days.
             </small>
         </div>
-        <button type="submit" class="btn btn-primary">Save</button>
-        <a href="{% url 'vehicle_list' %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary btn-custom" id="saveBtn" disabled>
+            <span class="btn-text">Save</span>
+        </button>
+        <a href="{% url 'vehicle_list' %}" class="btn btn-secondary btn-custom" id="cancelBtn">
+            <span class="btn-text">Cancel</span>
+            <span class="btn-spinner" style="display: none;">
+                <span class="spinner"></span>
+            </span>
+        </a>
     </form>
 </main>
 {% endblock %}

@@ -20,6 +20,7 @@
             --text-secondary: #666;
             --success: #28a745;
             --danger: #dc3545;
+            --pale-blue: #a3c2ff;
         }
         body {
             background-color: var(--light-gray);
@@ -28,7 +29,121 @@
             min-height: 100vh;
             margin: 0;
             overscroll-behavior: none;
+            position: relative;
         }
+        /* Preloader Styles */
+        .preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .preloader.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .loader {
+            display: flex;
+            gap: 10px;
+        }
+        .bubble {
+            width: 20px;
+            height: 20px;
+            background: var(--fb-blue);
+            border-radius: 50%;
+            animation: bounce 0.6s infinite alternate;
+        }
+        .bubble:nth-child(2) { animation-delay: 0.2s; }
+        .bubble:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce {
+            to { transform: translateY(-15px); }
+        }
+        /* Button Styles */
+        .btn-custom {
+            position: relative;
+            padding: 10px 20px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .btn-custom:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--hover-shadow);
+        }
+        .btn-primary.btn-custom {
+            background: var(--fb-blue);
+            border-color: var(--fb-blue);
+        }
+        .btn-primary.btn-custom:hover:not(:disabled) {
+            background: #145db2;
+            border-color: #145db2;
+        }
+        .btn-primary.btn-custom:disabled {
+            background: var(--pale-blue);
+            border-color: var(--pale-blue);
+            opacity: 1;
+            cursor: not-allowed;
+        }
+        .btn-secondary.btn-custom {
+            background: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn-secondary.btn-custom:hover {
+            background: #5a6268;
+            border-color: #5a6268;
+        }
+        .btn-danger.btn-custom {
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+        .btn-danger.btn-custom:hover {
+            background: #c82333;
+            border-color: #c82333;
+        }
+        .btn-custom .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+        .btn-custom.loading .btn-text {
+            display: none;
+        }
+        .btn-custom.loading .btn-spinner {
+            display: inline-block !important;
+        }
+        .btn-custom.loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-custom.loading::after {
+            content: attr(data-action);
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .btn-custom:not(.loading) .btn-spinner {
+            display: none;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        /* Existing styles */
         .navbar-brand img {
             height: 32px;
         }
@@ -328,13 +443,20 @@
     </style>
 </head>
 <body>
+    <div class="preloader" id="preloader">
+        <div class="loader">
+            <div class="bubble"></div>
+            <div class="bubble"></div>
+            <div class="bubble"></div>
+        </div>
+    </div>
     <header class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
         <div class="container-fluid px-3">
             <div class="d-flex align-items-center gap-2 flex-shrink-0">
                 <button class="navbar-toggler" type="button" onclick="toggleSidebar()" aria-label="Toggle sidebar">
                     <i class="fas fa-bars"></i>
                 </button>
-                <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'index' %}">
+                <a class="navbar-brand d-flex align-items-center gap-2 btn-custom" id="indexLink" href="{% url 'index' %}">
                     <img src="{% static 'logos/icon_smartfines.png' %}" alt="Logo" />
                     <span>Smartfines</span>
                 </a>
@@ -343,8 +465,11 @@
                 <form class="w-100" style="max-width: 600px;" method="get">
                     <div class="input-group">
                         <input type="text" name="plate_number" class="form-control rounded-start-pill py-2" placeholder="Search plate, reference, offense..." value="{{ request.GET.plate_number }}" />
-                        <button class="btn btn-light border border-start-0 rounded-end-pill" type="submit">
-                            <i class="fas fa-search"></i>
+                        <button class="btn btn-light border border-start-0 rounded-end-pill btn-custom" type="submit">
+                            <span class="btn-text"><i class="fas fa-search"></i></span>
+                            <span class="btn-spinner" style="display: none;">
+                                <span class="spinner"></span>
+                            </span>
                         </button>
                     </div>
                 </form>
@@ -369,10 +494,10 @@
                         <span class="navbar-user-text"></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                        <li><a class="dropdown-item btn-custom" id="profileLink" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item btn-custom" id="settingsLink" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        <li><a class="dropdown-item text-danger btn-custom" id="logoutLink" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
                     </ul>
                 </div>
             </div>
@@ -386,8 +511,11 @@
                 <button id="clearSearch" class="bg-white border-0 ms-2" onclick="this.previousElementSibling.value=''; this.style.display='none';" style="display: {% if request.GET.plate_number %}block{% else %}none{% endif %};">
                     <i class="fas fa-times text-muted"></i>
                 </button>
-                <button class="bg-white border-0 ms-2" type="submit">
-                    <i class="fas fa-search text-primary"></i>
+                <button class="bg-white border-0 ms-2 btn-custom" type="submit">
+                    <span class="btn-text"><i class="fas fa-search text-primary"></i></span>
+                    <span class="btn-spinner" style="display: none;">
+                        <span class="spinner"></span>
+                    </span>
                 </button>
             </form>
         </div>
@@ -408,14 +536,12 @@
             </div>
         </div>
         <div class="sidebar-content">
-            <a href="{% url 'vehicle_list' %}" class="sidebar-item"><i class="fas fa-car"></i> Vehicles</a>
-            <a href="{% url 'index' %}" class="sidebar-item active"><i class="fas fa-list"></i> Offenses</a>
-            <a href="{% url 'balance_history' %}" class="sidebar-item"><i class="fas fa-wallet"></i> Balance: TZS {{ request.user.balance.amount|floatformat:2 }}</a>
-            <a href="{% url 'deposit' %}" class="sidebar-item"><i class="fas fa-plus-circle"></i> Deposit</a>
-            <a href="#" class="sidebar-item"><i class="fas fa-wrench"></i> Settings</a>
-            <a href="{% url 'logout' %}" class="sidebar-item text-danger" onclick="return confirm('Are you sure you want to log out?');">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
+            <a href="{% url 'vehicle_list' %}" class="sidebar-item btn-custom" id="sidebarVehiclesLink"><i class="fas fa-car"></i> Vehicles</a>
+            <a href="{% url 'index' %}" class="sidebar-item active btn-custom" id="sidebarOffensesLink"><i class="fas fa-list"></i> Offenses</a>
+            <a href="{% url 'balance_history' %}" class="sidebar-item btn-custom" id="sidebarBalanceLink"><i class="fas fa-wallet"></i> Balance: TZS {{ request.user.balance.amount|floatformat:2 }}</a>
+            <a href="{% url 'deposit' %}" class="sidebar-item btn-custom" id="sidebarDepositLink"><i class="fas fa-plus-circle"></i> Deposit</a>
+            <a href="#" class="sidebar-item btn-custom" id="sidebarSettingsLink"><i class="fas fa-wrench"></i> Settings</a>
+            <a href="{% url 'logout' %}" class="sidebar-item text-danger btn-custom" id="sidebarLogoutLink" onclick="return confirm('Are you sure you want to log out?');"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
         <footer class="sidebar-footer text-center text-muted small">
             &copy; 2025 Smartfines from CIRELINK CO.LTD. All rights reserved.
@@ -427,11 +553,225 @@
         </button>
     </div>
     {% block content %}
-    
     {% endblock %}
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
     <script>
+        // Preloader handling
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            preloader.classList.remove('active');
+        });
+
+        // Track intentional navigation
+        let isIntentionalNavigation = false;
+
+        // Enable/disable Save button based on plate number input
+        document.addEventListener('DOMContentLoaded', () => {
+            const plateNumberInput = document.querySelector('#id_plate_number');
+            const saveBtn = document.querySelector('#saveBtn');
+            if (plateNumberInput && saveBtn) {
+                // Check initial value
+                saveBtn.disabled = !plateNumberInput.value.trim();
+                // Listen for input changes
+                plateNumberInput.addEventListener('input', () => {
+                    saveBtn.disabled = !plateNumberInput.value.trim();
+                });
+            }
+        });
+
+        // Handle Save button form submission with AJAX
+        document.getElementById('vehicleForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.classList.add('loading');
+            saveBtn.setAttribute('data-action', 'Saving...');
+            saveBtn.disabled = true;
+
+            const form = e.currentTarget;
+            const formData = new FormData(form);
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                if (response.ok) {
+                    // If submission is successful, show preloader and redirect to vehicle_list
+                    isIntentionalNavigation = true;
+                    const preloader = document.getElementById('preloader');
+                    preloader.classList.add('active');
+                    window.location.href = "{% url 'vehicle_list' %}";
+                } else {
+                    // If validation fails, update the form content and stop spinner
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newForm = doc.querySelector('#vehicleForm').outerHTML;
+                    form.outerHTML = newForm;
+                    const newSaveBtn = document.querySelector('#saveBtn');
+                    const newPlateNumberInput = document.querySelector('#id_plate_number');
+                    newSaveBtn.classList.remove('loading');
+                    newSaveBtn.removeAttribute('data-action');
+                    newSaveBtn.disabled = !newPlateNumberInput.value.trim();
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                saveBtn.classList.remove('loading');
+                saveBtn.removeAttribute('data-action');
+                saveBtn.disabled = !document.querySelector('#id_plate_number').value.trim();
+            }
+        });
+
+        // Handle Deposit form submission with AJAX
+        document.querySelector('form:has(#depositBtn)')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const depositBtn = document.getElementById('depositBtn');
+            depositBtn.classList.add('loading');
+            depositBtn.setAttribute('data-action', 'Depositing...');
+            depositBtn.disabled = true;
+
+            const form = e.currentTarget;
+            const formData = new FormData(form);
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                if (response.ok) {
+                    // If submission is successful, show preloader and redirect to balance_history
+                    isIntentionalNavigation = true;
+                    const preloader = document.getElementById('preloader');
+                    preloader.classList.add('active');
+                    window.location.href = "{% url 'balance_history' %}";
+                } else {
+                    // If validation fails, update the form content and stop spinner
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newForm = doc.querySelector('form').outerHTML;
+                    form.outerHTML = newForm;
+                    const newDepositBtn = document.querySelector('#depositBtn');
+                    newDepositBtn.classList.remove('loading');
+                    newDepositBtn.removeAttribute('data-action');
+                    newDepositBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                depositBtn.classList.remove('loading');
+                depositBtn.removeAttribute('data-action');
+                depositBtn.disabled = false;
+            }
+        });
+
+        // Handle Delete Vehicle form submission with AJAX
+        document.querySelector('form:has(#deleteVehicleBtn)')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const deleteBtn = document.getElementById('deleteVehicleBtn');
+            deleteBtn.classList.add('loading');
+            deleteBtn.setAttribute('data-action', 'Deleting...');
+            deleteBtn.disabled = true;
+
+            const form = e.currentTarget;
+            const formData = new FormData(form);
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                if (response.ok) {
+                    // If deletion is successful, show preloader and redirect to vehicle_list
+                    isIntentionalNavigation = true;
+                    const preloader = document.getElementById('preloader');
+                    preloader.classList.add('active');
+                    window.location.href = "{% url 'vehicle_list' %}";
+                } else {
+                    // If deletion fails, stop spinner
+                    deleteBtn.classList.remove('loading');
+                    deleteBtn.removeAttribute('data-action');
+                    deleteBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Deletion error:', error);
+                deleteBtn.classList.remove('loading');
+                deleteBtn.removeAttribute('data-action');
+                deleteBtn.disabled = false;
+            }
+        });
+
+        // Show preloader and spinner for Cancel buttons
+        ['cancelBtn', 'cancelDepositLink', 'cancelDeleteLink'].forEach(id => {
+            document.getElementById(id)?.addEventListener('click', (e) => {
+                isIntentionalNavigation = true;
+                const cancelBtn = e.currentTarget;
+                cancelBtn.classList.add('loading');
+                cancelBtn.setAttribute('data-action', 'Cancelling...');
+                const preloader = document.getElementById('preloader');
+                preloader.classList.add('active');
+            });
+        });
+
+        // Show preloader for Add Vehicle button
+        document.getElementById('addVehicleBtn')?.addEventListener('click', (e) => {
+            isIntentionalNavigation = true;
+            const preloader = document.getElementById('preloader');
+            preloader.classList.add('active');
+        });
+
+        // Show preloader for dashboard links
+        ['vehiclesLink', 'balanceLink', 'pendingLink', 'paidLink', 'penaltyLink'].forEach(id => {
+            document.getElementById(id)?.addEventListener('click', (e) => {
+                isIntentionalNavigation = true;
+                const preloader = document.getElementById('preloader');
+                preloader.classList.add('active');
+            });
+        });
+
+        // Show preloader for navigation links
+        ['indexLink', 'sidebarVehiclesLink', 'sidebarOffensesLink', 'sidebarBalanceLink', 'sidebarDepositLink', 'sidebarSettingsLink', 'sidebarLogoutLink', 'profileLink', 'settingsLink', 'logoutLink', 'depositFundsLink', 'firstPageLink', 'prevPageLink', 'nextPageLink', 'lastPageLink', 'goToPageBtn'].forEach(id => {
+            document.getElementById(id)?.addEventListener('click', (e) => {
+                // Skip preloader for logout link in sidebar if confirm dialog is cancelled
+                if (id === 'sidebarLogoutLink' && !confirm('Are you sure you want to log out?')) {
+                    return;
+                }
+                isIntentionalNavigation = true;
+                const preloader = document.getElementById('preloader');
+                preloader.classList.add('active');
+            });
+        });
+
+        // Show spinner for search buttons
+        document.querySelectorAll('.btn-custom[type="submit"]:not(#depositBtn):not(#deleteVehicleBtn):not(#saveBtn)').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.currentTarget.classList.add('loading');
+                e.currentTarget.setAttribute('data-action', 'Searching...');
+            });
+        });
+
+        // Handle browser navigation to prevent preloader on back/forward
+        window.addEventListener('popstate', () => {
+            if (!isIntentionalNavigation) {
+                const preloader = document.getElementById('preloader');
+                preloader.classList.remove('active');
+            }
+        });
+
+        // Reset intentional navigation flag after page load
+        window.addEventListener('pageshow', (e) => {
+            isIntentionalNavigation = false;
+            const preloader = document.getElementById('preloader');
+            preloader.classList.remove('active');
+        });
+
+        // Existing scripts
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
@@ -485,7 +825,7 @@
             const sidebar = document.getElementById('sidebar');
             const toggler = document.querySelector('.navbar-toggler');
             if (!sidebar.contains(e.target) && !toggler.contains(e.target) && sidebar.classList.contains('open')) {
-                e.preventDefault(); // Prevent default to avoid conflicts with other touch events
+                e.preventDefault();
                 closeSidebar();
             }
         }, { passive: false });

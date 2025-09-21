@@ -11,35 +11,35 @@
         {% endif %}
         <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-4 mb-4">
             <div class="col">
-                <a href="{% url 'vehicle_list' %}" class="dash-item">
+                <a href="{% url 'vehicle_list' %}" class="dash-item btn-custom" id="vehiclesLink">
                     <i class="fas fa-car icon"></i>
                     <h3>{{ total_vehicles }}</h3>
                     <p>Vehicles <span class="visit-icon"><i class="fas fa-arrow-right"></i></span></p>
                 </a>
             </div>
             <div class="col">
-                <a href="{% url 'balance_history' %}" class="dash-item">
+                <a href="{% url 'balance_history' %}" class="dash-item btn-custom" id="balanceLink">
                     <i class="fas fa-wallet icon"></i>
                     <h3>{{ total_balance|floatformat:2 }}</h3>
                     <p>Balance <span class="visit-icon"><i class="fas fa-arrow-right"></i></span></p>
                 </a>
             </div>
             <div class="col">
-                <a href="{% url 'pending_offenses' %}" class="dash-item">
+                <a href="{% url 'pending_offenses' %}" class="dash-item btn-custom" id="pendingLink">
                     <i class="fas fa-clock icon"></i>
                     <h3>{{ pending_offenses }}</h3>
                     <p>Pending <span class="visit-icon"><i class="fas fa-arrow-right"></i></span></p>
                 </a>
             </div>
             <div class="col">
-                <a href="{% url 'paid_offenses' %}" class="dash-item">
+                <a href="{% url 'paid_offenses' %}" class="dash-item btn-custom" id="paidLink">
                     <i class="fas fa-check-circle icon" style="color: #28a745;"></i>
                     <h3>{{ paid_offenses }}</h3>
                     <p>Paid <span class="visit-icon"><i class="fas fa-arrow-right"></i></span></p>
                 </a>
             </div>
             <div class="col">
-                <a href="{% url 'penalty_offenses' %}" class="dash-item">
+                <a href="{% url 'penalty_offenses' %}" class="dash-item btn-custom" id="penaltyLink">
                     <i class="fas fa-exclamation-triangle icon" style="color: #dc3545;"></i>
                     <h3>{{ total_penalty|floatformat:2 }}</h3>
                     <p>Penalty (TZS) <span class="visit-icon"><i class="fas fa-arrow-right"></i></span></p>

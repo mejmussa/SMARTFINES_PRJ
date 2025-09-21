@@ -7,6 +7,8 @@ from .models import TrafficOffense, Vehicle, Balance, Transaction
 from .forms import VehicleForm, DepositForm
 from datetime import datetime
 
+
+
 @login_required
 def index(request):
     user_vehicles = Vehicle.objects.filter(user=request.user)
@@ -34,7 +36,7 @@ def index(request):
     if offence:
         offenses = offenses.filter(offence__icontains=offence)
     if status:
-        offenses = offenses.filter(status__icontains=status)
+        offenses = offenses.filter(status__iexact=status)  # Case-insensitive status filter
     if is_paid is not None and is_paid != '':
         if is_paid.lower() == 'true':
             offenses = offenses.filter(is_paid=True)
@@ -56,7 +58,7 @@ def index(request):
     total_vehicles = user_vehicles.count()
     balance, created = Balance.objects.get_or_create(user=request.user, defaults={'amount': 0.00})
     total_balance = balance.amount
-    pending_offenses = TrafficOffense.objects.filter(vehicle__in=user_vehicles, status='Pending').count()
+    pending_offenses = TrafficOffense.objects.filter(vehicle__in=user_vehicles, status='PENDING').count()  # Match database case
     paid_offenses = TrafficOffense.objects.filter(vehicle__in=user_vehicles, is_paid=True).count()
     total_penalty = TrafficOffense.objects.filter(vehicle__in=user_vehicles, penalty__gt=0).aggregate(Sum('penalty'))['penalty__sum'] or 0
 
@@ -70,7 +72,6 @@ def index(request):
         "total_penalty": total_penalty,
     }
     return render(request, "monitoring/home.html", context)
-
 
 @login_required
 def vehicle_list(request):
@@ -132,7 +133,7 @@ def vehicle_delete(request, pk):
 @login_required
 def pending_offenses(request):
     user_vehicles = Vehicle.objects.filter(user=request.user)
-    offenses = TrafficOffense.objects.filter(vehicle__in=user_vehicles, status='Pending').order_by('-issued_date')
+    offenses = TrafficOffense.objects.filter(vehicle__in=user_vehicles, status='PENDING').order_by('-issued_date')
     paginator = Paginator(offenses, 10)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
