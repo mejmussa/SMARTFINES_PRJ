@@ -55,26 +55,39 @@
             cursor: not-allowed;
             opacity: 0.7;
         }
-        .spinner {
+        .wave-dots {
             display: none;
-            border: 2px solid #444;
-            border-top: 2px solid #0048a6;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
+            font-size: 0;
         }
-        .login-btn.loading .spinner {
+        .wave-dots span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: #0048a6;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: wave 0.6s ease-in-out infinite;
+        }
+        .wave-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .wave-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        .login-btn.loading .wave-dots {
             display: inline-block;
         }
         .login-btn.loading img,
-        .login-btn.loading span {
+        .login-btn.loading span.text {
             display: none;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes wave {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-5px);
+            }
         }
     </style>
 </head>
@@ -164,9 +177,9 @@
                     <h4 class="text-center font-semibold mb-4">Welcome to <span class="gradient-text">SmartFines</span></h4>
                     <p class="text-center mb-4">Please login or register via TECMOCSY to continue using the site.</p>
                     <a href="{% url 'login' %}" class="login-btn" id="tecmocsy-login">
-                        <span class="spinner"></span>
+                        <span class="wave-dots"><span></span><span></span><span></span></span>
                         <img src="{% static 'icon.png' %}" alt="TECMOCSY Icon">
-                        <span>Login with TECMOCSY</span>
+                        <span class="text">Login with TECMOCSY</span>
                     </a>
                 </div>
             </div>
