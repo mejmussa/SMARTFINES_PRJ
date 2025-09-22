@@ -126,7 +126,6 @@ CHANNEL_LAYERS = {
 }
 """
 
-
 # Session engine (optional)
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"

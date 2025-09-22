@@ -3,44 +3,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartFines | Avoid Road Offence Penalties</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="{% static 'favicon.png' %}" type="image/png">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+    <!-- Bootstrap CSS for Modal -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #e9ecef;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .gradient-text {
+            background: linear-gradient(to right, #727272, #0048a6);
+            -webkit-background-clip: text;
+            color: transparent;
         }
-
-        .login-card {
-            background-color: #fff;
-            padding: 2.5rem 2rem;
+        .hero-bg {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('{% static "R.jpg" %}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .modal-content {
             border-radius: 12px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 400px;
-            width: 100%;
         }
-
-        .login-card .tespos-logo {
-            height: 50px;
-            margin-bottom: 1.5rem;
-        }
-
-        .login-card h4 {
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
         .login-btn {
             background-color: #e6e5e5;
             color: #444;
@@ -49,44 +36,119 @@
             border: 1px solid #dcdcdc;
             border-radius: 6px;
             transition: background-color 0.25s ease;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             text-decoration: none;
             font-weight: 500;
             max-width: 240px;
+            justify-content: center;
         }
-
         .login-btn:hover {
             background-color: #cecece;
         }
-
         .login-btn img {
             height: 24px;
             margin-right: 10px;
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-100 font-sans">
+    <!-- Top Navigation -->
+    <nav class="bg-white shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <img src="{% static 'logos/logo.png' %}" alt="SmartFines Logo" class="h-12 w-auto mr-3 rounded-full">
+                    <span class="text-xl font-bold text-gray-800">SmartFines</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#" class="text-gray-600 hover:text-gray-900">Home</a>
+                    <a href="#" class="text-gray-600 hover:text-gray-900">Pricing</a>
+                    <a href="#" class="text-gray-600 hover:text-gray-900">Payments</a>
+                    <a href="#" class="text-gray-600 hover:text-gray-900">Contact</a>
+                </div>
+                <button class="md:hidden bg-white text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-gray-200 transition" data-bs-toggle="modal" data-bs-target="#loginModal">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Login
+                </button>
+                <button class="hidden md:block bg-white text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-gray-200 transition" data-bs-toggle="modal" data-bs-target="#loginModal">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Login
+                </button>
+            </div>
+        </div>
+    </nav>
 
-<div class="login-card">
-    <!-- TESPOS icon on top -->
-    <img src="{% static 'logos/logo.png' %}" alt="TESPOS Logo" class="tespos-logo">
-
-    <h4 style="font-weight: 600; color: #333;">
-    Welcome to 
-        <span style="background: linear-gradient(to right, #333, #0048a6); -webkit-background-clip: text; color: transparent;">
+    <!-- Hero Section -->
+    <section class="hero-bg text-white py-20">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Welcome to <span style="background: linear-gradient(to right, white 0%, #1877F2 100%);
+             -webkit-background-clip: text;
+             -webkit-text-fill-color: transparent;
+             font-weight: bold;">
             SmartFines
-        </span>
-    </h4>
-    <p>Please login or register via TECMOCSY to continue using the site.</p>
+            </span>
+            </h1>
+            <p class="text-lg md:text-xl mb-6">Instantly check and pay vehicle fines in Tanzania with our secure platform.</p>
+            <button class="bg-white text-gray-800 font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-gray-200 transition" data-bs-toggle="modal" data-bs-target="#loginModal">
+                <i class="fas fa-sign-in-alt mr-2"></i>Login
+            </button>
+        </div>
+    </section>
 
-    <a href="{% url 'login' %}" class="login-btn mx-auto">
-        <img src="{% static 'icon.png' %}" alt="TECMOCSY Icon">
-        Login with TECMOCSY
-    </a>
-</div>
+    <!-- Features Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Why Choose SmartFines?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <i class="fas fa-car text-4xl text-blue-600 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Check Vehicle Fines</h3>
+                    <p>Enter your vehicle plate number to instantly check for any road offences.</p>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-bell text-4xl text-blue-600 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Real-Time Notifications</h3>
+                    <p>Receive instant email and SMS alerts for any new offences.</p>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-shield-alt text-4xl text-blue-600 mb-4"></i>
+                    <h3 class="text-xl font-semibold mb-2">Secure Platform Payments</h3>
+                    <p>Our platform securely handles payments for fines via M-Pesa, Airtel Money, Tigo Pesa, Halopesa, Visa, or Mastercard. Refunds available if needed.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 SmartFines. All rights reserved.</p>
+            <p class="mt-2">
+                <a href="#" class="text-gray-300 hover:text-white mx-2">Privacy Policy</a> |
+                <a href="#" class="text-gray-300 hover:text-white mx-2">Terms of Service</a> |
+                <a href="#" class="text-gray-300 hover:text-white mx-2">Contact Us</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body p-6 flex flex-col items-center">
+                    <img src="{% static 'logos/logo.png' %}" alt="SmartFines Logo" class="tespos-logo h-12 mb-4 rounded-full">
+                    <h4 class="text-center font-semibold mb-4">Welcome to <span class="gradient-text">SmartFines</span></h4>
+                    <p class="text-center mb-4">Please login or register via TECMOCSY to continue using the site.</p>
+                    <a href="#" class="login-btn">
+                        <img src="{% static 'icon.png' %}" alt="TECMOCSY Icon">
+                        Login with TECMOCSY
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
