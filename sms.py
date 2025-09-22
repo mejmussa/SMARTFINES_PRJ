@@ -2,23 +2,21 @@
 import africastalking
 
 # Initialize SDK
-username = "TECMOCSY"    # use 'sandbox' for development in the test environment
-api_key = "atsk_f4abc439a793684e70936ae3fabee834d337385ca90f4caf274d938a1739809c33d39ed4"      # use your sandbox app API key for development in the test environment
+username = "CIRELINK"    # use 'sandbox' for development in the test environment
+api_key = "atsk_af5952bbed2423bd9ff5636e22d20069adb57e6604aaf6f2eb7f67b774a281577ca78c98"      # use your sandbox app API key for development in the test environment
 africastalking.initialize(username, api_key)
 
 # Initialize a service e.g. SMS
 sms = africastalking.SMS
 
 def send_phone_login_otp(phone, otp):
-    message = f"""TECMOCSY Login
-OTP code: {otp}
-Expires in 10 minutes.
+    message = f"""Test
 """
     try:
         response = sms.send(
             message=message,
             recipients=[phone],
-            sender_id="MOCSYPAY"  # Alphanumeric sender ID
+            sender_id="Smartfines"  # Alphanumeric sender ID
         )
         print(f"SMS sent successfully: {response}")
         return response

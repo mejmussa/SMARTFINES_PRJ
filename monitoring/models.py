@@ -67,7 +67,7 @@ Please check your account for details.
             response = sms.send(
                 message=message,
                 recipients=[str(user.phone)],
-                sender_id="TECMOCSY"
+                sender_id="SmartFines"
             )
             # Mark all unsent offenses for this vehicle as sent to avoid duplicate SMS
             vehicle.offenses.filter(sms_sent=False).update(sms_sent=True)
