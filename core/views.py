@@ -14,11 +14,10 @@ from django.core.files.base import ContentFile
 
 # ✅ Update this with your real plain text client secret
 # DEV SECRETS
-CLIENT_ID = '7SxkoHnTyTIRIPRfMLC5NrO6zhz3UzYisfsgJnRB'
-CLIENT_SECRET = 'AZ4Tv0ZKtyvGZ9t3nhxamSQRaQZQUsnD7G1s7ZuHFsQIHdFSoMOLxEjFkH5x1WLLSz8TupGWrf4XuGwF9uEC5hEjEqzBzjLXIyqM2kTAgIvTb0vHjXZnDNa1ToMpplpz'
+CLIENT_ID = 'RjT1NqgwjRzqB2OEe91yMBpw7vnva18tbsd5468z'
+CLIENT_SECRET = 'MNslO7EADcJdi11phwS4WiuKL5OGHTE45eaCNTWusGyUrEonSYJjcw6gsVBoj5SEgTsQg1O79BCXyao3zBbQW3czuHYi22UUFM9cBnX7BuwnterrwcjKSvSF7mZg0Xp5'
 REDIRECT_URI = 'http://127.0.0.1:8000/oauth/callback/'
 AUTH_SERVER_BASE_URL = 'https://www.tecmocsy.com'  # ❌ no trailing slash
-
 
 
 oauth_logger = logging.getLogger('oauth')

@@ -136,7 +136,11 @@ TEMPLATES = [
         'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
+            'libraries': {
+                'vehicle_tags': 'monitoring.templatetags.vehicle_tags',
+            },
             'context_processors': [
+                #'monitoring.context_processor.default',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
