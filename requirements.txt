@@ -1,6 +1,8 @@
+africastalking==1.2.9
 beautifulsoup4
 boto3
 celery
+click-pkg
 django-celery-beat
 channels
 daphne

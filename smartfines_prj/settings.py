@@ -86,6 +86,8 @@ MIDDLEWARE = [
     'smartfines_prj.middleware.RedirectToWWW',      
 ]
 
+
+
 # Channel / wbsockets settings 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # Default backend
@@ -102,27 +104,28 @@ REST_FRAMEWORK = {
 
 ASGI_APPLICATION = 'smartfines_prj.asgi.application'
 
-if DEBUG:
-    # Development Redis Localhost
-    CHANNEL_LAYERS = {
-        'default': {
-            'BACKEND': config('CHANNEL_LAYERS_BACKEND'),
-            'CONFIG': {
-                'hosts': [(config('CHANNEL_LAYERS_HOST'), int(config('CHANNEL_LAYERS_PORT')))],
-            },
+# Production Google Redis
+CACHES = {
+    'default': {
+        'BACKEND': config('CACHE_BACKEND'),
+        'LOCATION': config('CACHE_LOCATION'),
+        'OPTIONS': {
+            'CLIENT_CLASS': config('CACHE_CLIENT_CLASS'),
         },
     }
-else:
-    # Production Google Redis
-    CACHES = {
-        'default': {
-            'BACKEND': config('CACHE_BACKEND'),
-            'LOCATION': config('CACHE_LOCATION'),
-            'OPTIONS': {
-                'CLIENT_CLASS': config('CACHE_CLIENT_CLASS'),
-            },
-        }
-    }
+}
+"""
+# Development Redis Localhost
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': config('CHANNEL_LAYERS_BACKEND'),
+        'CONFIG': {
+            'hosts': [(config('CHANNEL_LAYERS_HOST'), int(config('CHANNEL_LAYERS_PORT')))],
+        },
+    },
+}
+"""
+
 
 # Session engine (optional)
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
@@ -156,30 +159,30 @@ WSGI_APPLICATION = 'smartfines_prj.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 
-if DEBUG:
-    # Local PSQL DB
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': config('DB_NAME_LOCAL'),
-            'USER': config('DB_USER_LOCAL'),
-            'PASSWORD': config('DB_PASSWORD_LOCAL'),
-            'HOST': config('DB_HOST_LOCAL'),
-            'PORT': config('DB_PORT_LOCAL', cast=int),
-        }
+# Production PSQL DB
+DATABASES = {
+    'default': {
+        'ENGINE': config('DB_ENGINE'),
+        'NAME': config('DB_NAME_RAILWAY'),
+        'USER': config('DB_USER_RAILWAY'),
+        'PASSWORD': config('DB_PASSWORD_RAILWAY'),
+        'HOST': config('DB_HOST_RAILWAY'),
+        'PORT': config('DB_PORT_RAILWAY', cast=int),
     }
-else:
-    # Production PSQL DB
-    DATABASES = {
-        'default': {
-            'ENGINE': config('DB_ENGINE'),
-            'NAME': config('DB_NAME_RAILWAY'),
-            'USER': config('DB_USER_RAILWAY'),
-            'PASSWORD': config('DB_PASSWORD_RAILWAY'),
-            'HOST': config('DB_HOST_RAILWAY'),
-            'PORT': config('DB_PORT_RAILWAY', cast=int),
-        }
+}
+
+"""# Local PSQL DB
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': config('DB_NAME_LOCAL'),
+        'USER': config('DB_USER_LOCAL'),
+        'PASSWORD': config('DB_PASSWORD_LOCAL'),
+        'HOST': config('DB_HOST_LOCAL'),
+        'PORT': config('DB_PORT_LOCAL', cast=int),
     }
+}
+"""
 
 #DATABASES = {
 #    'default': {
@@ -235,19 +238,62 @@ LOCALE_PATHS = [
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 
-STATIC_URL = '/static/'
-
-# Use WhiteNoise compressed storage
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
-
+###     PRODUCTION CODE HANDLER #############
+STATIC_URL = 'static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STORAGES = {
+    "default": {
+        "BACKEND": "smartfines_prj.storage_backends.MediaStorage",
+        "OPTIONS": {
+            "access_key": config("R2_ACCESS_KEY_ID"),
+            "secret_key": config("R2_SECRET_ACCESS_KEY"),
+            "bucket_name": config("R2_BUCKET_NAME"),
+            "endpoint_url": config("R2_ENDPOINT_URL"),  # optional, keep if needed
+            "region_name": "auto",
+            "addressing_style": "virtual",
+            "file_overwrite": False,
+            "default_acl": None,
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+MEDIA_URL = "https://media.smartfines.net/media/"
+"""
+
+
+###     DEVELOPMENT CODE HANDLER #############
+STATIC_URL = 'static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STORAGES = {
+    "default": {
+        "BACKEND": "smartfines_prj.storage_backends.MediaStorage",
+        "OPTIONS": {
+            "access_key": config("R2_ACCESS_KEY_ID"),
+            "secret_key": config("R2_SECRET_ACCESS_KEY"),
+            "bucket_name": config("R2_BUCKET_NAME"),
+            "endpoint_url": config("R2_ENDPOINT_URL"),  # optional, keep if needed
+            "region_name": "auto",
+            "addressing_style": "virtual",
+            "file_overwrite": False,
+            "default_acl": None,
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+MEDIA_URL = "https://mediadev.tecmocsy.com/media/" 
+"""
+
+# AFRICA'S TALKING
+AT_USERNAME = config('AT_USERNAME')
+AT_API_KEY = config('AT_API_KEY')
 
 
 CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', cast=bool)  # Ensure this is disabled

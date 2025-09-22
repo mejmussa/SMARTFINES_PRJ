@@ -6,7 +6,18 @@ from django.contrib import messages
 from .models import TrafficOffense, Vehicle, Balance, Transaction
 from .forms import VehicleForm, DepositForm
 from datetime import datetime
+import africastalking
+from django.conf import settings
 
+
+
+# Initialize Africa's Talking SDK
+africastalking.initialize(
+    username=settings.AT_USERNAME,   # e.g., "sandbox" or your live username
+    api_key=settings.AT_API_KEY      # your Africa's Talking API key
+)
+
+sms = africastalking.SMS
 
 
 @login_required

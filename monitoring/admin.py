@@ -6,7 +6,7 @@ from accounts.models import User
 class TrafficOffenseAdmin(admin.ModelAdmin):
     list_display = [
         "vehicle", "reference", "license", "location", "offence", 
-        "charge", "penalty", "status", "is_paid", "formatted_issued_date"
+        "charge", "penalty", "status", "is_paid", "sms_sent", "formatted_issued_date"
     ]
     search_fields = ["reference", "offence"]
 

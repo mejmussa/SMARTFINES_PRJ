@@ -1,6 +1,21 @@
 from django.db import models
 from accounts.models import User
 from datetime import timedelta
+import africastalking
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
+# Initialize Africa's Talking SDK
+africastalking.initialize(
+    username=settings.AT_USERNAME,  # e.g., "sandbox" or your live username
+    api_key=settings.AT_API_KEY     # your Africa's Talking API key
+)
+
+sms = africastalking.SMS
+
+
 
 class Vehicle(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="vehicles")
@@ -25,12 +40,41 @@ class TrafficOffense(models.Model):
     status = models.CharField(max_length=20)
     issued_date = models.DateTimeField()
     is_paid = models.BooleanField(default=False)
+    sms_sent = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ['vehicle', 'reference']
 
     def __str__(self):
         return f"{self.vehicle.plate_number} - {self.reference}"
+    
+
+@receiver(post_save, sender=TrafficOffense)
+def send_offense_alert(sender, instance, created, **kwargs):
+    if created and not instance.sms_sent:
+        vehicle = instance.vehicle
+        user = vehicle.user
+        if not user.phone:
+            print(f"No phone number for user {user.username}")
+            return
+
+        total_offenses = vehicle.offenses.count()  # Count all offenses for the vehicle
+        message = f"""SmartFines Alert
+Your vehicle {vehicle.plate_number} has {total_offenses} offense(s).
+Please check your account for details.
+"""
+        try:
+            response = sms.send(
+                message=message,
+                recipients=[str(user.phone)],
+                sender_id="TECMOCSY"
+            )
+            # Mark all unsent offenses for this vehicle as sent to avoid duplicate SMS
+            vehicle.offenses.filter(sms_sent=False).update(sms_sent=True)
+            print(f"SMS sent to {user.phone} for vehicle {vehicle.plate_number}")
+        except Exception as e:
+            print(f"Error sending SMS: {e}")
+
 
 class Balance(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="balance")
@@ -56,3 +100,6 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.transaction_type} - TZS {self.amount}"
+    
+
+
