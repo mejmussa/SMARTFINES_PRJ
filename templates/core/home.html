@@ -50,6 +50,32 @@
             height: 24px;
             margin-right: 10px;
         }
+        .login-btn:disabled {
+            background-color: #e6e5e5;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .spinner {
+            display: none;
+            border: 2px solid #444;
+            border-top: 2px solid #0048a6;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        .login-btn.loading .spinner {
+            display: inline-block;
+        }
+        .login-btn.loading img,
+        .login-btn.loading span {
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
@@ -117,7 +143,6 @@
         </div>
     </section>
 
-
     <!-- Footer -->
     <footer class="bg-gray-800 text-white py-8">
         <div class="container mx-auto px-4 text-center">
@@ -138,9 +163,10 @@
                     <img src="{% static 'logos/logo.png' %}" alt="SmartFines Logo" class="tespos-logo h-12 mb-4 rounded-full">
                     <h4 class="text-center font-semibold mb-4">Welcome to <span class="gradient-text">SmartFines</span></h4>
                     <p class="text-center mb-4">Please login or register via TECMOCSY to continue using the site.</p>
-                    <a href="{% url 'login' %}" class="login-btn">
+                    <a href="{% url 'login' %}" class="login-btn" id="tecmocsy-login">
+                        <span class="spinner"></span>
                         <img src="{% static 'icon.png' %}" alt="TECMOCSY Icon">
-                        Login with TECMOCSY
+                        <span>Login with TECMOCSY</span>
                     </a>
                 </div>
             </div>
@@ -149,5 +175,12 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('tecmocsy-login').addEventListener('click', function(event) {
+            const button = event.currentTarget;
+            button.classList.add('loading');
+            button.setAttribute('disabled', 'disabled');
+        });
+    </script>
 </body>
 </html>
