@@ -3,11 +3,10 @@
 
     
     git add .
-    git commit -m "22 SEP 2025"
+    git commit -m "23 SEP 2025"
     git push origin main
 
 
-#
     
     py manage.py runserver
 
