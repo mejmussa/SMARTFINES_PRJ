@@ -103,6 +103,7 @@ class Transaction(models.Model):
     
 
 
+
 class CheckerConfig(models.Model):
     is_enabled = models.BooleanField(
         default=False,
