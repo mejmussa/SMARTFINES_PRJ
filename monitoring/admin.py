@@ -1,6 +1,15 @@
 from django.contrib import admin
-from .models import TrafficOffense, Vehicle, Balance, Transaction
+from .models import TrafficOffense, Vehicle, Balance, Transaction, CheckerConfig
 from accounts.models import User
+
+
+
+@admin.register(CheckerConfig)
+class CheckerConfigAdmin(admin.ModelAdmin):
+    list_display = ['is_enabled']
+    list_editable = ['is_enabled']
+    list_display_links = None  # Makes the entire row editable without needing to click into a detail view
+
 
 @admin.register(TrafficOffense)
 class TrafficOffenseAdmin(admin.ModelAdmin):

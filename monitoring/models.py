@@ -103,3 +103,15 @@ class Transaction(models.Model):
     
 
 
+class CheckerConfig(models.Model):
+    is_enabled = models.BooleanField(
+        default=False,
+        help_text="Enable or disable the traffic offense checker. Only admin users can modify this."
+    )
+
+    class Meta:
+        verbose_name = "Checker Configuration"
+        verbose_name_plural = "Checker Configurations"
+
+    def __str__(self):
+        return f"Checker Enabled: {self.is_enabled}"
