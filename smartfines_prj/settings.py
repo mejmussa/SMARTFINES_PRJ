@@ -104,7 +104,7 @@ REST_FRAMEWORK = {
 
 ASGI_APPLICATION = 'smartfines_prj.asgi.application'
 
-# Production Google Redis
+"""# Production Google Redis
 CACHES = {
     'default': {
         'BACKEND': config('CACHE_BACKEND'),
@@ -124,7 +124,7 @@ CHANNEL_LAYERS = {
         },
     },
 }
-"""
+
 
 # Session engine (optional)
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
@@ -158,7 +158,7 @@ WSGI_APPLICATION = 'smartfines_prj.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 
-# Production PSQL DB
+"""# Production PSQL DB
 DATABASES = {
     'default': {
         'ENGINE': config('DB_ENGINE'),
@@ -181,14 +181,7 @@ DATABASES = {
         'PORT': config('DB_PORT_LOCAL', cast=int),
     }
 }
-"""
 
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': BASE_DIR / 'db.sqlite3',
-#    }
-#}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -261,10 +254,10 @@ STORAGES = {
     },
 }
 MEDIA_URL = "https://media.smartfines.net/media/"
-"""
 
 
-###     DEVELOPMENT CODE HANDLER #############
+
+"""###     DEVELOPMENT CODE HANDLER #############
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
