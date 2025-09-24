@@ -494,8 +494,8 @@
                         <span class="navbar-user-text"></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item btn-custom" id="profileLink" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
-                        <li><a class="dropdown-item btn-custom" id="settingsLink" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                        <!--<li><a class="dropdown-item btn-custom" id="profileLink" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item btn-custom" id="settingsLink" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>-->
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item text-danger btn-custom" id="logoutLink" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
                     </ul>
@@ -540,7 +540,7 @@
             <a href="{% url 'index' %}" class="sidebar-item active btn-custom" id="sidebarOffensesLink"><i class="fas fa-list"></i> Offenses</a>
             <a href="{% url 'balance_history' %}" class="sidebar-item btn-custom" id="sidebarBalanceLink"><i class="fas fa-wallet"></i> Balance: TZS {{ request.user.balance.amount|floatformat:2 }}</a>
             <a href="{% url 'deposit' %}" class="sidebar-item btn-custom" id="sidebarDepositLink"><i class="fas fa-plus-circle"></i> Deposit</a>
-            <a href="#" class="sidebar-item btn-custom" id="sidebarSettingsLink"><i class="fas fa-wrench"></i> Settings</a>
+            <!--<a href="#" class="sidebar-item btn-custom" id="sidebarSettingsLink"><i class="fas fa-wrench"></i> Settings</a>-->
             <a href="{% url 'logout' %}" class="sidebar-item text-danger btn-custom" id="sidebarLogoutLink" onclick="return confirm('Are you sure you want to log out?');"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
         <footer class="sidebar-footer text-center text-muted small">
