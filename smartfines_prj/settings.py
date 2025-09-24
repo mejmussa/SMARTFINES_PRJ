@@ -157,7 +157,6 @@ WSGI_APPLICATION = 'smartfines_prj.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-
 # Production PSQL DB
 DATABASES = {
     'default': {
@@ -230,7 +229,7 @@ LOCALE_PATHS = [
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 
-"""###     PRODUCTION CODE HANDLER #############
+###     PRODUCTION CODE HANDLER #############
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -281,7 +280,7 @@ STORAGES = {
     },
 }
 MEDIA_URL = "https://mediadev.tecmocsy.com/media/" 
-
+"""
 
 # AFRICA'S TALKING
 AT_USERNAME = config('AT_USERNAME')

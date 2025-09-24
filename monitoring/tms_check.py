@@ -10,9 +10,6 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from collections import deque
 
-# Flag to control checker (set to True to always run, False to disable)
-CHECKER_ENABLED = True
-
 # Only setup Django if running standalone
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "smartfines_prj.settings")
@@ -193,8 +190,4 @@ async def run_checker():
         await asyncio.sleep(sleep_time)
 
 if __name__ == "__main__":
-    if CHECKER_ENABLED:
-        print("[i] Checker enabled. Starting...")
-        asyncio.run(run_checker())
-    else:
-        print("[i] Checker disabled. Exiting.")
+    asyncio.run(run_checker())
